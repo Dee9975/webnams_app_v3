@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:webnams_app_v3/src/models/dashboard_model.dart';
+import 'package:webnams_app_v3/src/models/dashboard/dashboard_model.dart';
 import 'package:webnams_app_v3/src/models/meters/data.dart';
 import 'package:webnams_app_v3/src/resources/colors.dart';
 import 'package:webnams_app_v3/src/resources/decimal.dart';

@@ -1,6 +1,7 @@
 class BillsData {
   int iD;
   String date;
+  String number;
   var amountCalculated;
   var amountToPay;
   var amountUnpayd;
@@ -10,6 +11,7 @@ class BillsData {
 
   BillsData(
       {this.iD,
+        this.number,
         this.date,
         this.amountCalculated,
         this.amountToPay,
@@ -21,6 +23,7 @@ class BillsData {
   BillsData.fromJson(Map<String, dynamic> json) {
     iD = json['ID'];
     date = json['date'];
+    number = json['number'];
     amountCalculated = json['amount_calculated'];
     amountToPay = json['amount_to_pay'];
     amountUnpayd = json['amount_unpayd'];
@@ -38,6 +41,7 @@ class BillsData {
     data['amount_unpayd'] = this.amountUnpayd;
     data['amount_payd'] = this.amountPayd;
     data['type'] = this.type;
+    data['number'] = this.type;
     if (this.files != null) {
       data['files'] = this.files.toJson();
     }

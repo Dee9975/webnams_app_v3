@@ -1,8 +1,9 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
-import 'package:webnams_app_v3/src/models/error.dart';
-import 'package:webnams_app_v3/src/models/token.dart';
-import 'package:webnams_app_v3/src/models/user.dart';
+import 'package:webnams_app_v3/src/models/auth/error.dart';
+import 'package:webnams_app_v3/src/models/auth/token.dart';
+import 'package:webnams_app_v3/src/models/host/host_model.dart';
+import 'package:webnams_app_v3/src/models/user/user.dart';
 import 'package:webnams_app_v3/src/resources/hash.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
@@ -16,6 +17,7 @@ class UserData extends ChangeNotifier {
   bool _isFetching = false;
   String _error = '';
   bool _hasError = false;
+  HostModel _hosts;
 
   final client = http.Client();
 
@@ -23,9 +25,12 @@ class UserData extends ChangeNotifier {
   String get error => _error;
   bool get hasError => _hasError;
   String get getResponseText => _jsonResponse;
+  HostModel get hosts => _hosts;
 
   Future<void> updateEmail(String email) async {
     user.email = email;
+    notifyListeners();
+    await getHosts();
     notifyListeners();
   }
 
@@ -43,12 +48,27 @@ class UserData extends ChangeNotifier {
     notifyListeners();
   }
 
+  void updateError(bool status, String message) {
+    _hasError = status;
+    notifyListeners();
+    _error = message;
+    notifyListeners();
+  }
+
   Future<void> getHosts() async {
     _isFetching = true;
     notifyListeners();
     var response = await client.post('$_url/user', body: {'user': user.email});
     if (response.statusCode == 200) {
-      _jsonResponse = response.body;
+      _hasError = false;
+      _error = '';
+      notifyListeners();
+      _hosts = HostModel.fromJson(json.decode(response.body));
+      notifyListeners();
+    } else {
+      _hasError = true;
+      _error = json.decode(response.body)['error'];
+      notifyListeners();
     }
     _isFetching = false;
     notifyListeners();
@@ -86,6 +106,11 @@ class UserData extends ChangeNotifier {
       }
       await prefs
           .setStringList('user', [user.email, user.password, user.clientSecret, '${user.host}']);
+      var expires = DateTime.now().add(new Duration(hours: 1)).toString();
+      await prefs.setStringList('token', [
+        tokenData.accessToken,
+        expires,
+      ]);
     } else {
       _hasError = true;
       _error = json.decode(response.body)['error'];

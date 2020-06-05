@@ -55,6 +55,10 @@ class DecimalTextInputFormatter extends TextInputFormatter {
           extentOffset: math.min(truncated.length, truncated.length + 1),
         );
       }
+      if (decimalRange == 0 && value.contains('.')) {
+        truncated = oldValue.text;
+        newSelection = oldValue.selection;
+      }
 
       return TextEditingValue(
         text: truncated,

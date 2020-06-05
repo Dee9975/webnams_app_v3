@@ -6,14 +6,16 @@ class Bills {
   int page;
   int pages;
   List<BillsData> data;
+  String message;
 
-  Bills({this.rows, this.rowsTotal, this.page, this.pages, this.data});
+  Bills({this.rows, this.rowsTotal, this.page, this.pages, this.data, this.message});
 
   Bills.fromJson(Map<String, dynamic> json) {
     rows = json['rows'];
     rowsTotal = json['rows_total'];
     page = json['page'];
     pages = json['pages'];
+    json['message'] != null ? message = json['message'] : message = null;
     if (json['data'] != null) {
       data = new List<BillsData>();
       json['data'].forEach((v) {

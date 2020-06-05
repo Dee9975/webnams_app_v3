@@ -1,20 +1,22 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:webnams_app_v3/src/models/dashboard_model.dart';
 import 'package:webnams_app_v3/src/resources/my_flutter_app_icons.dart';
 import 'package:webnams_app_v3/src/screens/bills.dart';
-import 'package:webnams_app_v3/src/screens/home.dart';
-import 'package:webnams_app_v3/src/screens/meters.dart';
-import 'package:webnams_app_v3/src/widgets/more.dart';
+import 'package:webnams_app_v3/src/screens/sliver_home.dart';
+import 'package:webnams_app_v3/src/screens/sliver_meters.dart';
 import 'package:webnams_app_v3/src/widgets/top_bar.dart';
+import 'package:webnams_app_v3/src/models/dashboard/dashboard_model.dart';
+
+import 'more.dart';
 
 class Dashboard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
+    final dashState = Provider.of<DashModel>(context);
     List<Widget> _widgetOptions = <Widget>[
-      Home(),
+      SliverHome(),
       Bills(),
-      Meters(),
+      SliverMeters(),
       More(),
     ];
     return WillPopScope(
@@ -28,22 +30,22 @@ class Dashboard extends StatelessWidget {
         bottomNavigationBar: IgnorePointer(
           ignoring: Provider.of<DashModel>(context).isLoading,
           child: BottomNavigationBar(
-            items: const <BottomNavigationBarItem>[
+            items: <BottomNavigationBarItem>[
               BottomNavigationBarItem(
                 icon: Icon(Icons.home),
-                title: Text('Sākums'),
+                title: Text(!dashState.isLoading ? dashState.getTranslation(code: 'mob_app_home') : ''),
               ),
               BottomNavigationBarItem(
                 icon: Icon(MyFlutterApp.rekins),
-                title: Text('Rēķini'),
+                title: Text(!dashState.isLoading ? dashState.getTranslation(code: 'mob_app_bills') : ''),
               ),
               BottomNavigationBarItem(
                 icon: Icon(MyFlutterApp.skait),
-                title: Text('Skaitītāji'),
+                title: Text(!dashState.isLoading ? dashState.getTranslation(code: 'mob_app_meters') : ''),
               ),
               BottomNavigationBarItem(
                 icon: Icon(MyFlutterApp.menu),
-                title: Text('Vairāk'),
+                title: Text(!dashState.isLoading ? dashState.getTranslation(code: 'mob_app_more_meters') : ''),
               ),
             ],
             currentIndex: Provider.of<DashModel>(context).dash.selectedIndex,

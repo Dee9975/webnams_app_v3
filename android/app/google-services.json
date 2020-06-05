@@ -1,0 +1,48 @@
+{
+  "project_info": {
+    "project_number": "526295679456",
+    "firebase_url": "https://webnams-app.firebaseio.com",
+    "project_id": "webnams-app",
+    "storage_bucket": "webnams-app.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:526295679456:android:fd4aa2d7545b7b541eeb85",
+        "android_client_info": {
+          "package_name": "com.vardatusistemas.webnams_app_v3"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "526295679456-ksa4a3gcm8tgqjc2jf5frbft5a861qee.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.vardatusistemas.webnams_app_v3",
+            "certificate_hash": "37ebd4062236ec4105290d2eeb1ca9711f7657d4"
+          }
+        },
+        {
+          "client_id": "526295679456-vn18d3vu7ussf3dk7fe23k2an69cp7kj.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCBRpmHIqXw-fsO0knp0R5SpHD9CjyGeMs"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "526295679456-vn18d3vu7ussf3dk7fe23k2an69cp7kj.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

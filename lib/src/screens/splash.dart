@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:webnams_app_v3/src/models/dashboard/dashboard_model.dart';
 
 class Splash extends StatefulWidget {
   const Splash({Key key}) : super(key: key);
@@ -14,6 +16,7 @@ class _SplashState extends State<Splash> {
     super.initState();
     Future.microtask(() async {
       SharedPreferences prefs = await SharedPreferences.getInstance();
+      await Provider.of<DashModel>(context, listen: false).getLanguages();
       if (prefs.containsKey('user')) {
         Navigator.pushNamed(context, '/dashboard');
       } else {

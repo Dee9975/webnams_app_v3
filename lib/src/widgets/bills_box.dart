@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:webnams_app_v3/src/models/bills/data.dart';
-import 'package:webnams_app_v3/src/models/dashboard_model.dart';
+import 'package:webnams_app_v3/src/models/dashboard/dashboard_model.dart';
 import 'package:webnams_app_v3/src/resources/colors.dart';
 import 'package:webnams_app_v3/src/resources/my_flutter_app_icons.dart';
 
@@ -15,6 +15,7 @@ class BillsBox extends StatelessWidget {
   BillsBox(this.data) : assert(data != null);
   @override
   Widget build(BuildContext context) {
+    final dashState = Provider.of<DashModel>(context);
     if (data.amountUnpayd <= 0) {
       return Offstage();
     }
@@ -63,14 +64,14 @@ class BillsBox extends StatelessWidget {
                   padding: const EdgeInsets.only(top: 8.0),
                   child: data.amountUnpayd <= 0
                       ? Text(
-                          "Apmaksāts",
+                          dashState.getTranslation(code: 'mob_app_paid'),
                           style: TextStyle(
                               fontSize: 16.0,
                               fontWeight: FontWeight.w600,
                               color: hexToColor('#8d96a4')),
                         )
                       : Text(
-                          'Neapmaksāts',
+                          dashState.getTranslation(code: 'mob_app_unpaid'),
                           style: TextStyle(
                               fontSize: 16.0,
                               fontWeight: FontWeight.w600,
@@ -85,7 +86,7 @@ class BillsBox extends StatelessWidget {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: <Widget>[
                   Text(
-                    'Rēķina Nr: ${data.iD}',
+                    '${dashState.getTranslation(code: 'mob_app_bill_nr')}: ${data.iD}',
                     style: TextStyle(fontSize: 16.0),
                   ),
                   Text(
@@ -99,7 +100,7 @@ class BillsBox extends StatelessWidget {
             Padding(
               padding: EdgeInsets.only(left: 16.0, bottom: 16.0),
               child: Text(
-                'Apmaksāt līdz: ${data.date}',
+                '${dashState.getTranslation(code: 'mob_app_due')}: ${data.date}',
                 style: TextStyle(
                     fontSize: 16.0,
                     color: data.amountUnpayd <= 0

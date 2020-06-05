@@ -1,12 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:webnams_app_v3/src/models/user_model.dart';
+import 'package:webnams_app_v3/src/models/dashboard/dashboard_model.dart';
+import 'package:webnams_app_v3/src/models/user/user_model.dart';
 import 'package:webnams_app_v3/src/resources/colors.dart';
 
 class Hosts extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final hostState = Provider.of<UserData>(context);
+    final dashState = Provider.of<DashModel>(context);
     void updateHost(String id, String hostName) {
       hostState.updateHost(int.parse(id), hostName);
       Navigator.pushNamed(context, '/password');
@@ -14,7 +16,11 @@ class Hosts extends StatelessWidget {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text('Apsaimniekotāju izvēlne'),
+        title: Text(
+          dashState.getTranslation(code: 'mob_app_host_appbar_title'),
+          style: TextStyle(fontSize: 17.0, fontWeight: FontWeight.w600),
+        ),
+        centerTitle: true,
         elevation: 0,
       ),
       body: Column(
@@ -23,7 +29,7 @@ class Hosts extends StatelessWidget {
           Padding(
             padding: const EdgeInsets.only(left: 16.0, top: 24.0, bottom: 8.0),
             child: Text(
-              'Apsaimniekotājs',
+              dashState.getTranslation(code: 'mob_app_host_app_title'),
               style: TextStyle(
                   fontSize: 28.0,
                   fontWeight: FontWeight.w600,
@@ -33,31 +39,31 @@ class Hosts extends StatelessWidget {
           Padding(
             padding: const EdgeInsets.only(left: 16.0, bottom: 24.0),
             child: Text(
-              'Lūdzu izvēlies apsaimniekotāju',
+              dashState.getTranslation(code: 'mob_app_host_app_subtitle'),
               style: TextStyle(fontSize: 16.0, color: hexToColor('#222e42')),
             ),
           ),
           Container(
             child: hostState.isFetching
                 ? CircularProgressIndicator()
-                : hostState.getResponseJson() != null
+                : hostState.hosts != null
                     ? ListView.builder(
                         primary: false,
-                        itemCount: hostState.getResponseJson()['hosts'].length,
+                        itemCount: hostState.hosts.data.hosts.length,
                         shrinkWrap: true,
                         itemBuilder: (context, index) {
                           return Container(
                             padding: EdgeInsets.zero,
                             child: ListTile(
                               title: Text(
-                                hostState.getResponseJson()['hosts'][index]
-                                    ['host_name'],
+                                hostState.hosts.data.hosts[index].hostName,
                                 style: TextStyle(fontSize: 16.0),
                               ),
                               trailing: Icon(Icons.arrow_right),
                               onTap: () {
-                                updateHost(hostState.getResponseJson()['hosts']
-                                    [index]['host_id'], hostState.getResponseJson()['hosts'][index]['host_name']);
+                                updateHost(
+                                    hostState.hosts.data.hosts[index].hostId,
+                                    hostState.hosts.data.hosts[index].hostName);
                               },
                             ),
                             decoration: BoxDecoration(

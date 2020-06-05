@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:webnams_app_v3/src/models/dashboard_model.dart';
+import 'package:webnams_app_v3/src/models/dashboard/dashboard_model.dart';
 import 'package:webnams_app_v3/src/resources/colors.dart';
 
 const Color _kKeyUmbraOpacity = Color(0x33000000); // alpha = 0.2
@@ -13,6 +13,8 @@ class TopBar extends StatelessWidget implements PreferredSizeWidget {
   TopBar() : preferredSize = Size.fromHeight(kToolbarHeight);
   @override
   Widget build(BuildContext context) {
+    final ScrollController scrollController = new ScrollController();
+    final dashState = Provider.of<DashModel>(context);
     Future<void> _addressesDialog() async {
       showDialog(
           context: context,
@@ -28,7 +30,7 @@ class TopBar extends StatelessWidget implements PreferredSizeWidget {
                     Padding(
                       padding: const EdgeInsets.only(top: 24.0, left: 16.0),
                       child: Text(
-                        'Izvēlies kontu',
+                        dashState.getTranslation(code: 'mob_app_accounts_title'),
                         style: TextStyle(
                             fontSize: 22, fontWeight: FontWeight.w600),
                         textAlign: TextAlign.left,
@@ -36,56 +38,59 @@ class TopBar extends StatelessWidget implements PreferredSizeWidget {
                     ),
                     Container(
                       padding: EdgeInsets.only(top: 16.0),
-                      height: 175,
-                      child: ListView.builder(
-                        shrinkWrap: true,
-                        itemCount:
-                            Provider.of<DashModel>(context, listen: false)
-                                .addresses
-                                .data
-                                .length,
-                        itemBuilder: (context, int index) {
-                          return Container(
-                            padding: EdgeInsets.zero,
-                            decoration: BoxDecoration(
-                              border: Border(
-                                top: index == 0
-                                    ? BorderSide(color: hexToColor('#d6dde3'))
-                                    : BorderSide(
-                                        width: 0, color: hexToColor('#d6dde3')),
-                                bottom:
-                                    BorderSide(color: hexToColor('#d6dde3')),
+                      height: 190,
+                      child: RefreshIndicator(
+                        onRefresh: () => Provider.of<DashModel>(context, listen: false).getAddresses(refresh: true),
+                        child: ListView.builder(
+                          shrinkWrap: true,
+                          itemCount:
+                              Provider.of<DashModel>(context, listen: false)
+                                  .addresses
+                                  .data
+                                  .length,
+                          itemBuilder: (context, int index) {
+                            return Container(
+                              padding: EdgeInsets.zero,
+                              decoration: BoxDecoration(
+                                border: Border(
+                                  top: index == 0
+                                      ? BorderSide(color: hexToColor('#d6dde3'))
+                                      : BorderSide(
+                                          width: 0, color: hexToColor('#d6dde3')),
+                                  bottom:
+                                      BorderSide(color: hexToColor('#d6dde3')),
+                                ),
                               ),
-                            ),
-                            child: ListTile(
-                              title: Text(
-                                Provider.of<DashModel>(context, listen: false)
-                                    .addresses
-                                    .data[index]
-                                    .addressName,
-                                style: TextStyle(
-                                    fontSize: 16, color: hexToColor('#222e42')),
+                              child: ListTile(
+                                title: Text(
+                                  Provider.of<DashModel>(context, listen: false)
+                                      .addresses
+                                      .data[index]
+                                      .addressName,
+                                  style: TextStyle(
+                                      fontSize: 16, color: hexToColor('#222e42')),
+                                ),
+                                trailing: Text(
+                                  '${Provider.of<DashModel>(context, listen: false).addresses.data[index].personId}',
+                                  style: TextStyle(
+                                      fontWeight: FontWeight.w600,
+                                      fontSize: 16,
+                                      color: hexToColor('#222e42')),
+                                ),
+                                onTap: () {
+                                  Provider.of<DashModel>(context, listen: false)
+                                      .updateSelectedAddress(
+                                          Provider.of<DashModel>(context,
+                                                  listen: false)
+                                              .addresses
+                                              .data[index]);
+                                  Navigator.of(context).pop();
+                                },
+                                dense: true,
                               ),
-                              trailing: Text(
-                                '${Provider.of<DashModel>(context, listen: false).addresses.data[index].personId}',
-                                style: TextStyle(
-                                    fontWeight: FontWeight.w600,
-                                    fontSize: 16,
-                                    color: hexToColor('#222e42')),
-                              ),
-                              onTap: () {
-                                Provider.of<DashModel>(context, listen: false)
-                                    .updateSelectedAddress(
-                                        Provider.of<DashModel>(context,
-                                                listen: false)
-                                            .addresses
-                                            .data[index]);
-                                Navigator.of(context).pop();
-                              },
-                              dense: true,
-                            ),
-                          );
-                        },
+                            );
+                          },
+                        ),
                       ),
                     ),
                     Padding(
@@ -101,7 +106,7 @@ class TopBar extends StatelessWidget implements PreferredSizeWidget {
                         child: RaisedButton(
                           elevation: 0,
                           child: Text(
-                            'Pievienot kontu',
+                            dashState.getTranslation(code: 'mob_app_add_button'),
                             style: TextStyle(
                                 color: Colors.white,
                                 fontSize: 18.0,
@@ -125,7 +130,7 @@ class TopBar extends StatelessWidget implements PreferredSizeWidget {
                         child: RaisedButton(
                           elevation: 0,
                           child: Text(
-                            'Aizvērt',
+                            dashState.getTranslation(code: 'mob_app_close'),
                             style: TextStyle(
                                 color: hexToColor('#3e4a5e'),
                                 fontSize: 18.0,
