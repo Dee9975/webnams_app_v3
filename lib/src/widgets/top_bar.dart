@@ -93,30 +93,30 @@ class TopBar extends StatelessWidget implements PreferredSizeWidget {
                         ),
                       ),
                     ),
-                    Padding(
-                      padding: const EdgeInsets.only(
-                          left: 16.0, right: 16.0, top: 18.0),
-                      child: ButtonTheme(
-                        height: 40.0,
-                        minWidth: double.infinity,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(24.0),
-                        ),
-                        buttonColor: hexToColor('#23a0ff'),
-                        child: RaisedButton(
-                          elevation: 0,
-                          child: Text(
-                            dashState.getTranslation(code: 'mob_app_add_button'),
-                            style: TextStyle(
-                                color: Colors.white,
-                                fontSize: 18.0,
-                                fontWeight: FontWeight.w600),
-                          ),
-                          onPressed: () async {},
-                          // onPressed: _isButtonDisabled ? null : _updateEmail,
-                        ),
-                      ),
-                    ),
+//                    Padding(
+//                      padding: const EdgeInsets.only(
+//                          left: 16.0, right: 16.0, top: 18.0),
+//                      child: ButtonTheme(
+//                        height: 40.0,
+//                        minWidth: double.infinity,
+//                        shape: RoundedRectangleBorder(
+//                          borderRadius: BorderRadius.circular(24.0),
+//                        ),
+//                        buttonColor: hexToColor('#23a0ff'),
+//                        child: RaisedButton(
+//                          elevation: 0,
+//                          child: Text(
+//                            dashState.getTranslation(code: 'mob_app_add_button'),
+//                            style: TextStyle(
+//                                color: Colors.white,
+//                                fontSize: 18.0,
+//                                fontWeight: FontWeight.w600),
+//                          ),
+//                          onPressed: () async {},
+//                          // onPressed: _isButtonDisabled ? null : _updateEmail,
+//                        ),
+//                      ),
+//                    ),
                     Padding(
                       padding: const EdgeInsets.only(
                           left: 16.0, right: 16.0, top: 8.0, bottom: 24.0),
@@ -186,7 +186,8 @@ class TopBar extends StatelessWidget implements PreferredSizeWidget {
                             spreadRadius: 0.0,
                             color: _kAmbientShadowOpacity),
                       ]),
-                  width: MediaQuery.of(context).size.width - 64,
+//                  width: MediaQuery.of(context).size.width - 64,
+                width: MediaQuery.of(context).size.width - 16,
                   height: 40,
                   child: Stack(
                     alignment: Alignment.center,
@@ -229,30 +230,30 @@ class TopBar extends StatelessWidget implements PreferredSizeWidget {
                 ),
               ),
             ),
-            Container(
-              margin: EdgeInsets.only(left: 8.0),
-              width: 40,
-              height: 40,
-              child: ButtonTheme(
-                buttonColor: Colors.white,
-                child: RaisedButton(
-                  padding: EdgeInsets.all(0),
-                  shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(10)),
-                  child: Container(
-                      width: 24.0,
-                      height: 24.0,
-                      child: Center(
-                        child: Image.asset(
-                          'assets/add.png',
-                          width: 24,
-                          height: 24,
-                        ),
-                      )),
-                  onPressed: () {},
-                ),
-              ),
-            )
+//            Container(
+//              margin: EdgeInsets.only(left: 8.0),
+//              width: 40,
+//              height: 40,
+//              child: ButtonTheme(
+//                buttonColor: Colors.white,
+//                child: RaisedButton(
+//                  padding: EdgeInsets.all(0),
+//                  shape: RoundedRectangleBorder(
+//                      borderRadius: BorderRadius.circular(10)),
+//                  child: Container(
+//                      width: 24.0,
+//                      height: 24.0,
+//                      child: Center(
+//                        child: Image.asset(
+//                          'assets/add.png',
+//                          width: 24,
+//                          height: 24,
+//                        ),
+//                      )),
+//                  onPressed: () {},
+//                ),
+//              ),
+//            )
           ],
         ),
       ),

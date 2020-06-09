@@ -53,7 +53,7 @@ class _SliverMetersState extends State<SliverMeters>
     }
   }
 
-  _checkReading() {
+  void _checkReading() {
     DashModel dashState = Provider.of(context, listen: false);
 
     if (readingController.text.isNotEmpty) {
@@ -184,6 +184,47 @@ class _SliverMetersState extends State<SliverMeters>
                                 fontSize: 22, fontWeight: FontWeight.w600),
                             textAlign: TextAlign.left,
                           ),
+                        ),
+                        Padding(
+                          padding: const EdgeInsets.only(left: 16.0, top: 5.0),
+                          child: Row(
+                          children: <Widget>[
+                              Text(
+                                Provider.of<DashModel>(context)
+                                    .selectedMeter
+                                    .type,
+                                style: TextStyle(
+                                    fontSize: 16.0,
+                                fontWeight: FontWeight.w600),
+                              )
+                            ],
+                          ),
+                        ),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: <Widget>[
+                            Padding(
+                              padding: const EdgeInsets.only(left: 16.0),
+                              child: Text(dashState.getTranslation(code: 'mob_app_number')),
+                            ),
+                            Padding(
+                              padding: const EdgeInsets.only(right: 16.0),
+                              child: Text('${dashState.selectedMeter.number}', style: TextStyle(fontWeight: FontWeight.w600),),
+                            ),
+                          ],
+                        ),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: <Widget>[
+                            Padding(
+                              padding: const EdgeInsets.only(left: 16.0),
+                              child: Text(dashState.getTranslation(code: 'mob_app_last')),
+                            ),
+                            Padding(
+                              padding: const EdgeInsets.only(right: 16.0),
+                              child: Text('${dashState.selectedMeter.lastReading['value']?? '0'}', style: TextStyle(fontWeight: FontWeight.w600),),
+                            ),
+                          ],
                         ),
                         Container(
                           height: 40,

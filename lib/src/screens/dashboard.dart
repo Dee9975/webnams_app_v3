@@ -33,19 +33,19 @@ class Dashboard extends StatelessWidget {
             items: <BottomNavigationBarItem>[
               BottomNavigationBarItem(
                 icon: Icon(Icons.home),
-                title: Text(!dashState.isLoading ? dashState.getTranslation(code: 'mob_app_home') : ''),
+                title: Text(!dashState.isLoading ? dashState.getTranslation(code: 'mob_app_home') : '', style: TextStyle(fontWeight: FontWeight.w600),),
               ),
               BottomNavigationBarItem(
                 icon: Icon(MyFlutterApp.rekins),
-                title: Text(!dashState.isLoading ? dashState.getTranslation(code: 'mob_app_bills') : ''),
+                title: Text(!dashState.isLoading ? dashState.getTranslation(code: 'mob_app_bills') : '', style: TextStyle(fontWeight: FontWeight.w600),),
               ),
               BottomNavigationBarItem(
                 icon: Icon(MyFlutterApp.skait),
-                title: Text(!dashState.isLoading ? dashState.getTranslation(code: 'mob_app_meters') : ''),
+                title: Text(!dashState.isLoading ? dashState.getTranslation(code: 'mob_app_meters') : '', style: TextStyle(fontWeight: FontWeight.w600),),
               ),
               BottomNavigationBarItem(
                 icon: Icon(MyFlutterApp.menu),
-                title: Text(!dashState.isLoading ? dashState.getTranslation(code: 'mob_app_more_meters') : ''),
+                title: Text(!dashState.isLoading ? dashState.getTranslation(code: 'mob_app_more_meters') : '', style: TextStyle(fontWeight: FontWeight.w600),),
               ),
             ],
             currentIndex: Provider.of<DashModel>(context).dash.selectedIndex,

@@ -404,6 +404,7 @@ class DashModel extends ChangeNotifier {
       _shareData = await rootBundle.load(_pdf.path);
       notifyListeners();
     } catch (e) {
+      print(e);
     }
   }
 
