@@ -37,8 +37,24 @@ class _SliverMetersState extends State<SliverMeters>
   void initState() {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
-    readingController.addListener(_checkReading);
+    readingController.addListener(_textListener);
+    _focusNode.addListener(_onFocusChange);
     _shouldIgnore = true;
+  }
+
+  void _textListener() {
+    DashModel dashState = Provider.of(context, listen: false);
+    if (readingController.text == '') {
+      dashState.updateWarning('');
+    }
+  }
+
+  void _onFocusChange() {
+    if (readingController.text != null &&
+        readingController.text.isNotEmpty &&
+        !_focusNode.hasFocus) {
+      _checkReading();
+    }
   }
 
   @override
@@ -55,33 +71,61 @@ class _SliverMetersState extends State<SliverMeters>
 
   void _checkReading() {
     DashModel dashState = Provider.of(context, listen: false);
+    String getMax() {
+      MeterData state =
+          Provider.of<DashModel>(context, listen: false).selectedMeter;
+      String val = '';
+      if (state.signsBefore != null && state.signsBefore > 0) {
+        for (int i = 0; i < state.signsBefore; i++) {
+          val += '9';
+        }
+      }
+      if (state.signsAfter != null && state.signsAfter > 0) {
+        val += '.';
+        for (int i = 0; i < state.signsAfter; i++) {
+          val += '9';
+        }
+      }
+      return val;
+    }
 
     if (readingController.text.isNotEmpty) {
       double reading = double.parse(readingController.text);
       var multiplier = dashState.selectedMeter.multiplier;
-      if (reading <= dashState.selectedMeter.lastReading['value']) {
-        dashState.updateWarning(
-            dashState.getTranslation(code: 'mob_app_reading_too_low'));
-        setState(() {
-          _shouldIgnore = true;
-        });
+      if (dashState.selectedMeter.lastReading != null &&
+          dashState.selectedMeter.lastReading['value'] != 0 &&
+          dashState.selectedMeter.lastReading != null &&
+          dashState.selectedMeter.lastReading['value'] != 0) {
+        if ((dashState.selectedMeter.lastReading['value'] +
+            (dashState.selectedMeter.avgReading['value'] * 2)) >
+            double.parse(getMax()) &&
+            reading < dashState.selectedMeter.lastReading['value']) {
+          dashState.updateWarning(
+              dashState.getTranslation(code: 'mob_app_reading_too_low'));
+          setState(() {
+            _shouldIgnore = true;
+          });
+        } else {
+          dashState.updateWarning('');
+          double spending =
+              (reading - dashState.selectedMeter.lastReading['value']) *
+                  multiplier;
+          dashState.updateSpending(spending);
+          _shouldIgnore = false;
+          if (dashState.selectedMeter.avgReading.isNotEmpty &&
+              spending > dashState.selectedMeter.avgReading['value']) {
+            dashState.updateWarning(dashState.getTranslation(
+                code: 'mob_app_consumption_ower_average'));
+          }
+          if (spending > dashState.selectedMeter.limit) {
+            dashState.updateWarning(
+                dashState.getTranslation(code: 'mob_app_consumption_too_big'));
+            _shouldIgnore = true;
+          }
+        }
       } else {
         dashState.updateWarning('');
-        double spending =
-            (reading - dashState.selectedMeter.lastReading['value']) *
-                multiplier;
-        dashState.updateSpending(spending);
         _shouldIgnore = false;
-        if (dashState.selectedMeter.avgReading.isNotEmpty &&
-            spending > dashState.selectedMeter.avgReading['value']) {
-          dashState.updateWarning(dashState.getTranslation(
-              code: 'mob_app_consumption_ower_average'));
-        }
-        if (spending > dashState.selectedMeter.limit) {
-          dashState.updateWarning(
-              dashState.getTranslation(code: 'mob_app_consumption_too_big'));
-          _shouldIgnore = true;
-        }
       }
     } else {
       dashState.updateWarning('');
@@ -159,6 +203,7 @@ class _SliverMetersState extends State<SliverMeters>
       setState(() {
         readingController.text = '';
       });
+      dashState.updateWarning('');
       showDialog(
           barrierDismissible: false,
           context: context,
@@ -188,14 +233,14 @@ class _SliverMetersState extends State<SliverMeters>
                         Padding(
                           padding: const EdgeInsets.only(left: 16.0, top: 5.0),
                           child: Row(
-                          children: <Widget>[
+                            children: <Widget>[
                               Text(
                                 Provider.of<DashModel>(context)
                                     .selectedMeter
                                     .type,
                                 style: TextStyle(
                                     fontSize: 16.0,
-                                fontWeight: FontWeight.w600),
+                                    fontWeight: FontWeight.w600),
                               )
                             ],
                           ),
@@ -205,11 +250,15 @@ class _SliverMetersState extends State<SliverMeters>
                           children: <Widget>[
                             Padding(
                               padding: const EdgeInsets.only(left: 16.0),
-                              child: Text(dashState.getTranslation(code: 'mob_app_number')),
+                              child: Text(dashState.getTranslation(
+                                  code: 'mob_app_number')),
                             ),
                             Padding(
                               padding: const EdgeInsets.only(right: 16.0),
-                              child: Text('${dashState.selectedMeter.number}', style: TextStyle(fontWeight: FontWeight.w600),),
+                              child: Text(
+                                '${dashState.selectedMeter.number}',
+                                style: TextStyle(fontWeight: FontWeight.w600),
+                              ),
                             ),
                           ],
                         ),
@@ -218,11 +267,15 @@ class _SliverMetersState extends State<SliverMeters>
                           children: <Widget>[
                             Padding(
                               padding: const EdgeInsets.only(left: 16.0),
-                              child: Text(dashState.getTranslation(code: 'mob_app_last')),
+                              child: Text(dashState.getTranslation(
+                                  code: 'mob_app_last')),
                             ),
                             Padding(
                               padding: const EdgeInsets.only(right: 16.0),
-                              child: Text('${dashState.selectedMeter.lastReading['value']?? '0'}', style: TextStyle(fontWeight: FontWeight.w600),),
+                              child: Text(
+                                '${dashState.selectedMeter.lastReading['value'] ?? '0'}',
+                                style: TextStyle(fontWeight: FontWeight.w600),
+                              ),
                             ),
                           ],
                         ),
@@ -647,12 +700,12 @@ class _SliverMetersState extends State<SliverMeters>
                                           .currentConsumption ==
                                       0
                                   ? Padding(
-                                    padding: const EdgeInsets.only(
+                                      padding: const EdgeInsets.only(
                                           left: 8.0, right: 8.0, top: 8.0),
-                                    child: Align(
-                                      alignment: Alignment.bottomCenter,
-                                      heightFactor: 1.8,
-                                      child: ButtonTheme(
+                                      child: Align(
+                                        alignment: Alignment.bottomCenter,
+                                        heightFactor: 1.8,
+                                        child: ButtonTheme(
                                           height: 40.0,
                                           minWidth: double.infinity,
                                           shape: RoundedRectangleBorder(
@@ -681,15 +734,15 @@ class _SliverMetersState extends State<SliverMeters>
                                             // onPressed: _isButtonDisabled ? null : _updateEmail,
                                           ),
                                         ),
-                                    ),
-                                  )
+                                      ),
+                                    )
                                   : Padding(
-                                    padding: const EdgeInsets.only(
+                                      padding: const EdgeInsets.only(
                                           left: 8.0, right: 8.0, top: 8.0),
-                                    child: Align(
-                                      alignment: Alignment.bottomCenter,
-                                      heightFactor: 1,
-                                      child: ButtonTheme(
+                                      child: Align(
+                                        alignment: Alignment.bottomCenter,
+                                        heightFactor: 1,
+                                        child: ButtonTheme(
                                           height: 40.0,
                                           minWidth: double.infinity,
                                           shape: RoundedRectangleBorder(
@@ -718,14 +771,17 @@ class _SliverMetersState extends State<SliverMeters>
                                             // onPressed: _isButtonDisabled ? null : _updateEmail,
                                           ),
                                         ),
-                                    ),
-                                  )
+                                      ),
+                                    )
                               : Offstage(),
                         ],
                       ),
                     ),
                   );
-                }, itemCount: Provider.of<DashModel>(context).meters.rows, crossAxisCount: 2,),
+                },
+                itemCount: Provider.of<DashModel>(context).meters.rows,
+                crossAxisCount: 2,
+              ),
             ],
           ),
         );
