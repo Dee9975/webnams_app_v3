@@ -3,6 +3,7 @@ import 'package:flutter/foundation.dart';
 import 'package:webnams_app_v3/src/models/auth/error.dart';
 import 'package:webnams_app_v3/src/models/auth/token.dart';
 import 'package:webnams_app_v3/src/models/host/host_model.dart';
+import 'package:webnams_app_v3/src/models/login/login.dart';
 import 'package:webnams_app_v3/src/models/user/user.dart';
 import 'package:webnams_app_v3/src/resources/hash.dart';
 import 'package:http/http.dart' as http;
@@ -36,9 +37,8 @@ class UserData extends ChangeNotifier {
 
   Future<void> updatePassword(String password) async {
     user.password = password;
-    user.clientSecret = generateMd5(password);
     notifyListeners();
-    await login();
+    await newLogin();
     notifyListeners();
   }
 
@@ -104,8 +104,8 @@ class UserData extends ChangeNotifier {
         notifyListeners();
         return;
       }
-      await prefs
-          .setStringList('user', [user.email, user.password, user.clientSecret, '${user.host}']);
+      await prefs.setStringList('user',
+          [user.email, user.password, user.clientSecret, '${user.host}']);
       var expires = DateTime.now().add(new Duration(hours: 1)).toString();
       await prefs.setStringList('token', [
         tokenData.accessToken,
@@ -117,6 +117,48 @@ class UserData extends ChangeNotifier {
       notifyListeners();
     }
     _isFetching = false;
+    notifyListeners();
+  }
+
+  Future<void> newLogin() async {
+    _isFetching = true;
+    notifyListeners();
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    String username = 'WebNAMS_APP';
+    String password = 'zF##u#^\$kaehxzkuG+F&u3*b8aDJGK#-Ra@d2JPC';
+    String basicAuth =
+        'Basic ' + base64Encode(utf8.encode('$username:$password'));
+    http.Response response =
+        await client.post('$_url/login', headers: <String, String>{
+      'authorization': basicAuth,
+    }, body: {
+      'host_id': '${user.host}',
+      'grant_type': 'password',
+      'username': user.email,
+      'password': user.password,
+    });
+    if (response.statusCode == 200) {
+      Login login = Login.fromJson(json.decode(response.body));
+      prefs.setString('token', login.data.accessToken);
+      prefs.setString('refresh_token', login.data.refreshToken);
+      prefs.setString('expires', DateTime.now().add(new Duration(hours: 1)).toString());
+      prefs.setInt('user_id', login.data.userId);
+      prefs.setInt('host_id', user.host);
+      prefs.setString('username', user.email);
+      prefs.setString('password', user.password);
+      prefs.setBool('userExists', true);
+      _hasError = false;
+      notifyListeners();
+      _error = '';
+      notifyListeners();
+      _isFetching = false;
+      notifyListeners();
+      return;
+    }
+    TokenError tokenError = TokenError.fromJson(json.decode(response.body));
+    _hasError = true;
+    notifyListeners();
+    _error = tokenError.error;
     notifyListeners();
   }
 

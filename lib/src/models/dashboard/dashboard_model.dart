@@ -6,6 +6,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:webnams_app_v3/src/models/addresses/addresses.dart';
 import 'package:webnams_app_v3/src/models/addresses/data.dart';
 import 'package:webnams_app_v3/src/models/auth/error.dart';
+import 'package:webnams_app_v3/src/models/auth/refresh.dart';
 import 'package:webnams_app_v3/src/models/auth/token.dart';
 import 'package:webnams_app_v3/src/models/bills/bills.dart';
 import 'package:webnams_app_v3/src/models/bills/data.dart';
@@ -69,7 +70,7 @@ class DashModel extends ChangeNotifier {
   DashBoardBox get dashboardBox => _dashBoardBox;
   LanguageModel get langs => _langs;
   String get flashText => _flashText;
-  String get debugError =>  _debugError;
+  String get debugError => _debugError;
 
   DashModel() {
     getUser();
@@ -83,7 +84,6 @@ class DashModel extends ChangeNotifier {
       _flashText = getTranslation(code: 'mob_app_flashlight_button');
       notifyListeners();
     }
-
   }
 
   void updateDebugError(String e) {
@@ -177,32 +177,23 @@ class DashModel extends ChangeNotifier {
   }
 
   Future<void> getAddresses({bool refresh = false}) async {
-    notifyListeners();
-    bool check = await checkToken();
-    if (check) {
-      http.Response response = await client.post('$_url/login', body: {
-        'client_id': user.email,
-        'client_secret': user.clientSecret,
-        'password': user.password,
-        'host_id': '${user.host}',
-        'grant_type': 'client_credentials'
-      });
-      if (response.statusCode == 200) {
-        _addresses = Addresses.fromJson(json.decode(response.body));
-        refresh != null && !refresh
-            ? _selectedAddress = _addresses.data[0]
-            : _selectedAddress = _selectedAddress;
-        notifyListeners();
-      } else {
-        _hasError = true;
-        _error = 'Invalid token';
-        notifyListeners();
-        throw Exception('Failed to get addresses');
-      }
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    await getToken();
+    http.Response response = await client.post('$_url/addresses', body: {
+      'host_id': '${user.host}',
+      'user_id': '${prefs.getInt('user_id')}',
+      'access_token': dash.token,
+    });
+
+    if (response.statusCode == 200) {
+      _addresses = Addresses.fromJson(json.decode(response.body));
+      notifyListeners();
+      _selectedAddress = _addresses.data[0];
+      notifyListeners();
     }
   }
 
-  Future<void> getToken() async {
+  Future<void> newGetToken() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     bool check = await checkToken();
     if (check) {
@@ -223,9 +214,23 @@ class DashModel extends ChangeNotifier {
     }
   }
 
+  Future<void> getToken() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    bool check = await checkToken();
+    if (check) {
+      dash.token = prefs.getString('token');
+      user.token = dash.token;
+      notifyListeners();
+    } else {
+      _error = 'Error getting the token';
+      _hasError = true;
+      notifyListeners();
+    }
+  }
+
   Future<void> getUser() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
-    var userData = prefs.getStringList('user');
+    var userData = prefs.getString('username');
     var langData = prefs.getInt('language');
     if (langData == null) {
       prefs.setInt('language', 0);
@@ -244,8 +249,8 @@ class DashModel extends ChangeNotifier {
       getFlashText(false);
       return;
     } else {
-      user = User(userData[0], userData[1], userData[2], int.parse(userData[3]),
-          '', dash.token);
+      user = User(prefs.getString('username'), prefs.getString('password'), '',
+          prefs.getInt('host_id'), '', prefs.getString('token'));
     }
     dash.language = prefs.getInt('language');
     _isLoading = true;
@@ -302,15 +307,15 @@ class DashModel extends ChangeNotifier {
   Future<bool> checkToken() async {
     DateTime now = DateTime.now().toUtc();
     SharedPreferences prefs = await SharedPreferences.getInstance();
-    var tokenData = prefs.getStringList('token');
+    var tokenData = prefs.getString('expires');
     if (tokenData == null) {
       await refreshToken();
     }
-    if (DateTime.parse(tokenData[1]).compareTo(now) > 0) {
+    if (DateTime.parse(tokenData).compareTo(now) > 0) {
       return true;
     }
     var response = await refreshToken();
-    if (response is Token) {
+    if (response is Refresh) {
       return true;
     } else {
       return false;
@@ -318,22 +323,26 @@ class DashModel extends ChangeNotifier {
   }
 
   Future<dynamic> refreshToken() async {
-    var response = await client.post('$_url/oauth_token', body: {
-      'client_id': user.email,
-      'client_secret': user.clientSecret,
-      'grant_type': 'client_credentials',
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    String username = 'WebNAMS_APP';
+    String password = 'zF##u#^\$kaehxzkuG+F&u3*b8aDJGK#-Ra@d2JPC';
+    String basicAuth =
+        'Basic ' + base64Encode(utf8.encode('$username:$password'));
+    var response = await client.post('$_url/token', headers: {
+      'authorization': basicAuth
+    }, body: {
+      'refresh_token': prefs.getString('refresh_token'),
+      'grant_type': 'refresh_token',
     });
     if (response.statusCode == 200) {
-      Token tokenData = Token.fromJson(json.decode(response.body));
-      SharedPreferences prefs = await SharedPreferences.getInstance();
+      Refresh refresh = Refresh.fromJson(json.decode(response.body));
       var expires = DateTime.now().add(new Duration(hours: 1)).toString();
-      await prefs.setStringList('token', [
-        tokenData.accessToken,
-        expires,
-      ]);
-      dash.token = tokenData.accessToken;
+      prefs.setString('token', refresh.accessToken);
+      prefs.setString('expires', expires);
+      prefs.setString('refresh_token', refresh.refreshToken);
+      dash.token = refresh.accessToken;
       notifyListeners();
-      return tokenData;
+      return refresh;
     } else {
       TokenError errorData = TokenError.fromJson(json.decode(response.body));
       return errorData;
@@ -368,10 +377,13 @@ class DashModel extends ChangeNotifier {
   }
 
   Future<void> getDashBox() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
     await getToken();
     http.Response response = await client.post(
         '$_url/dashboard/${_selectedAddress.id}?access_token=${dash.token}',
-        body: {'host_id': '${user.host}',
+        body: {
+          'host_id': '${user.host}',
+//          'user_id': '${prefs.getInt('user_id')}',
           'id': '${_selectedAddress.id}',
           'language': _langs.data[dash.language].code.toLowerCase(),
         });

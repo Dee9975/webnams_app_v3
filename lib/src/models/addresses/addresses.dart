@@ -6,9 +6,8 @@ class Addresses {
 	int page;
 	int pages;
 	List<AddressData> data;
-  String language;
 
-	Addresses({this.rows, this.rowsTotal, this.page, this.pages, this.data, this.language});
+	Addresses({this.rows, this.rowsTotal, this.page, this.pages, this.data});
 
 	Addresses.fromJson(Map<String, dynamic> json) {
 		rows = json['rows'];
@@ -16,9 +15,10 @@ class Addresses {
 		page = json['page'];
 		pages = json['pages'];
 		if (json['data'] != null) {
-			language = json['data']['language'];
-      data = new List<AddressData>();
-      json['data']['addresses'].forEach((v) { data.add(new AddressData.fromJson(v)); });
+			data = new List<AddressData>();
+			json['data'].forEach((v) {
+				data.add(new AddressData.fromJson(v));
+			});
 		}
 	}
 
@@ -28,9 +28,9 @@ class Addresses {
 		data['rows_total'] = this.rowsTotal;
 		data['page'] = this.page;
 		data['pages'] = this.pages;
-		if (this.data!= null) {
-      data['data']['addresses'] = this.data.map((v) => v.toJson()).toList();
-    }
+		if (this.data != null) {
+			data['data'] = this.data.map((v) => v.toJson()).toList();
+		}
 		return data;
 	}
 }

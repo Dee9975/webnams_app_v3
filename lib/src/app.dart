@@ -6,6 +6,7 @@ import 'package:webnams_app_v3/src/screens/bill.dart';
 import 'package:webnams_app_v3/src/screens/login.dart';
 import 'package:webnams_app_v3/src/screens/password.dart';
 import 'package:webnams_app_v3/src/screens/pdf_view.dart';
+import 'package:webnams_app_v3/src/screens/picker.dart';
 import 'package:webnams_app_v3/src/screens/settings.dart';
 import 'package:webnams_app_v3/src/screens/splash.dart';
 import 'package:provider/provider.dart';
@@ -57,6 +58,7 @@ class App extends StatelessWidget {
             '/bill': (context) => Bill(),
             '/pdf': (context) => PdfView(),
             '/settings': (context) => Settings(),
+            '/meter_picker': (context) => MeterPicker(),
           },
         ),
       ),

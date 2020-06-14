@@ -36,6 +36,20 @@ class Settings extends StatelessWidget {
                   color: hexToColor('#e5edf3'),
                 ),
               ),
+              Container(
+                width: double.infinity,
+                margin: EdgeInsets.symmetric(horizontal: 8.0),
+                child: RaisedButton(
+                  child: Text(
+                    'Skaitītāju test',
+                    style: TextStyle(fontSize: 16.0, color: hexToColor('#ff1303')),
+                  ),
+                  onPressed: () async {
+                    Navigator.pushNamed(context, '/meter_picker');
+                  },
+                  color: hexToColor('#e5edf3'),
+                ),
+              ),
             ],
           ),
         ],

@@ -55,6 +55,37 @@ class _LoginState extends State<Login> {
     DashModel dashModel = Provider.of<DashModel>(context);
     if (!dashModel.isLoading) {
       return Scaffold(
+//        bottomNavigationBar: BottomAppBar(
+//          elevation: 0,
+//          child: Container(
+//          margin: EdgeInsets.only(left: 16.0, right: 16.0, bottom: 16.0),
+//          child: Row(
+//            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+//            children: <Widget>[
+//              ClipOval(
+//                child: FlatButton(
+//                  onPressed: () {
+//
+//                  },
+//                  child: Image.asset('assets/lv.png', height: 48.0,),
+//                ),
+//              ),
+//              FlatButton(
+//                onPressed: () {
+//
+//                },
+//                child: Image.asset('assets/en.png', height: 48.0,),
+//              ),
+//              FlatButton(
+//                onPressed: () {
+//
+//                },
+//                child: Image.asset('assets/ru.png', height: 48.0,),
+//              ),
+//            ],
+//          ),
+//          ),
+//        ),
         bottomNavigationBar: BottomAppBar(
           elevation: 0,
           child: Container(

@@ -17,7 +17,7 @@ class _SplashState extends State<Splash> {
     Future.microtask(() async {
       SharedPreferences prefs = await SharedPreferences.getInstance();
       await Provider.of<DashModel>(context, listen: false).getLanguages();
-      if (prefs.containsKey('user')) {
+      if (prefs.containsKey('userExists') && prefs.getBool('userExists')) {
         Navigator.pushNamed(context, '/dashboard');
       } else {
         Navigator.pushNamed(context, '/login');
