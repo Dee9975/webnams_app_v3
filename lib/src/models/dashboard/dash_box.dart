@@ -1,3 +1,5 @@
+import 'package:webnams_app_v3/src/models/announcements/announcements.dart';
+import 'package:webnams_app_v3/src/models/dashboard/dashAnnouncements.dart';
 import 'package:webnams_app_v3/src/models/meters/data.dart';
 
 class DashBoardBox {
@@ -33,13 +35,18 @@ class DashBoardBox {
 class DashBoxData {
   Balance balance;
   List<MeterData> meters;
-  DashBoxData({this.balance, this.meters});
+  List<AnnouncementData> announcements;
+  DashBoxData({this.balance, this.meters, this.announcements});
 
   DashBoxData.fromJson(Map<String, dynamic> json) {
     balance = json['balance'] != null ? Balance.fromJson(json['balance']) : null;
     if (json['meters'] != null) {
       meters = new List<MeterData>();
       json['meters'].forEach((v) => meters.add(MeterData.fromJson(v)));
+    }
+    if (json['announcements'] != null) {
+      announcements = new List<AnnouncementData>();
+      json['announcements'].forEach((v) => announcements.add(AnnouncementData.fromJson(v)));
     }
   }
 

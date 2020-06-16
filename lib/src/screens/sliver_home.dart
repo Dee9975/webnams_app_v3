@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:webnams_app_v3/src/models/dashboard/dashboard_model.dart';
 import 'package:webnams_app_v3/src/resources/colors.dart';
+import 'package:webnams_app_v3/src/widgets/announcements_box.dart';
 import 'package:webnams_app_v3/src/widgets/meters_box.dart';
 import 'package:webnams_app_v3/src/widgets/payment_warning.dart';
 
@@ -14,7 +15,8 @@ class SliverHome extends StatelessWidget {
       );
     }
     return RefreshIndicator(
-      onRefresh: () => Provider.of<DashModel>(context, listen: false).refreshHome(),
+      onRefresh: () =>
+          Provider.of<DashModel>(context, listen: false).refreshHome(),
       child: CustomScrollView(
         slivers: <Widget>[
           SliverToBoxAdapter(
@@ -39,25 +41,33 @@ class SliverHome extends StatelessWidget {
                             children: <Widget>[
                               Provider.of<DashModel>(context)
                                           .dashboardBox
-                                          .data.balance
+                                          .data
+                                          .balance
                                           .typeId ==
                                       3
                                   ? Padding(
-                                      padding: const EdgeInsets.only(right: 10.0),
+                                      padding:
+                                          const EdgeInsets.only(right: 10.0),
                                       child: PaymentWarning(),
                                     )
                                   : Offstage(),
                               Text(
                                 Provider.of<DashModel>(context)
                                             .dashboardBox
-                                            .data.balance
+                                            .data
+                                            .balance
                                             .typeId !=
                                         1
                                     ? Provider.of<DashModel>(context)
                                         .dashboardBox
-                                        .data.balance
+                                        .data
+                                        .balance
                                         .amount
-                                    : Provider.of<DashModel>(context).dashboardBox.data.balance.type,
+                                    : Provider.of<DashModel>(context)
+                                        .dashboardBox
+                                        .data
+                                        .balance
+                                        .type,
                                 style: TextStyle(
                                     color: Colors.white,
                                     fontSize: 48,
@@ -68,7 +78,8 @@ class SliverHome extends StatelessWidget {
                         ),
                         Provider.of<DashModel>(context)
                                     .dashboardBox
-                                    .data.balance
+                                    .data
+                                    .balance
                                     .typeId !=
                                 1
                             ? Padding(
@@ -76,7 +87,8 @@ class SliverHome extends StatelessWidget {
                                 child: Text(
                                   Provider.of<DashModel>(context)
                                       .dashboardBox
-                                      .data.balance
+                                      .data
+                                      .balance
                                       .type,
                                   style: TextStyle(
                                     fontSize: 18,
@@ -89,7 +101,12 @@ class SliverHome extends StatelessWidget {
                           padding: const EdgeInsets.only(
                               left: 24.0, bottom: 24.0, top: 16.0),
                           child: Text(
-                            Provider.of<DashModel>(context).dashboardBox.data.balance.msg?? '',
+                            Provider.of<DashModel>(context)
+                                    .dashboardBox
+                                    .data
+                                    .balance
+                                    .msg ??
+                                '',
                             style: TextStyle(
                                 fontSize: 22,
                                 fontWeight: FontWeight.w600,
@@ -112,14 +129,51 @@ class SliverHome extends StatelessWidget {
           ),
           SliverList(
             delegate: SliverChildBuilderDelegate((context, int index) {
-              if (Provider.of<DashModel>(context).dashboardBox.data.meters != null) {
-                return MetersBox(Provider.of<DashModel>(context).dashboardBox.data.meters[index]);
+              if (Provider.of<DashModel>(context)
+                      .dashboardBox
+                      .data
+                      .announcements !=
+                  null) {
+                return AnnouncementsBox(Provider.of<DashModel>(context)
+                    .dashboardBox
+                    .data
+                    .announcements[index]);
+              } else {
+                return Offstage();
+              }
+            },
+                childCount: Provider.of<DashModel>(context)
+                            .dashboardBox
+                            .data
+                            .announcements !=
+                        null
+                    ? Provider.of<DashModel>(context)
+                        .dashboardBox
+                        .data
+                        .announcements
+                        .length
+                    : 0),
+          ),
+          SliverList(
+            delegate: SliverChildBuilderDelegate((context, int index) {
+              if (Provider.of<DashModel>(context).dashboardBox.data.meters !=
+                  null) {
+                return MetersBox(Provider.of<DashModel>(context)
+                    .dashboardBox
+                    .data
+                    .meters[index]);
               }
               return Offstage();
             },
-                childCount: Provider.of<DashModel>(context).dashboardBox.data.meters != null
-                    ? Provider.of<DashModel>(context).dashboardBox.data.meters.length
-                    : 0),
+                childCount:
+                    Provider.of<DashModel>(context).dashboardBox.data.meters !=
+                            null
+                        ? Provider.of<DashModel>(context)
+                            .dashboardBox
+                            .data
+                            .meters
+                            .length
+                        : 0),
           )
         ],
       ),

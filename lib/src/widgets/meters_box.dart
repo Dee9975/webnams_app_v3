@@ -51,7 +51,7 @@ class MetersBox extends StatelessWidget {
                     color: _kAmbientShadowOpacity),
               ]),
           width: double.infinity,
-          margin: EdgeInsets.only(bottom: 8.0),
+          margin: EdgeInsets.only(top: 8.0),
           child: Padding(
             padding: const EdgeInsets.only(
                 top: 8.0, left: 16.0, right: 16.0, bottom: 16.0),

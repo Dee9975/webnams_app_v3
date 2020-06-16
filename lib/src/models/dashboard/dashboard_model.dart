@@ -5,6 +5,7 @@ import 'package:path_provider/path_provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:webnams_app_v3/src/models/addresses/addresses.dart';
 import 'package:webnams_app_v3/src/models/addresses/data.dart';
+import 'package:webnams_app_v3/src/models/announcements/announcements.dart';
 import 'package:webnams_app_v3/src/models/auth/error.dart';
 import 'package:webnams_app_v3/src/models/auth/refresh.dart';
 import 'package:webnams_app_v3/src/models/auth/token.dart';
@@ -50,6 +51,8 @@ class DashModel extends ChangeNotifier {
   Translations _translations;
   String _flashText;
   String _debugError;
+  Announcements _announcements;
+  AnnouncementData _selectedAnnouncement;
 
   String get error => _error;
   bool get hasError => _hasError;
@@ -71,6 +74,8 @@ class DashModel extends ChangeNotifier {
   LanguageModel get langs => _langs;
   String get flashText => _flashText;
   String get debugError => _debugError;
+  Announcements get announcements => _announcements;
+  AnnouncementData get selectedAnnouncement => _selectedAnnouncement;
 
   DashModel() {
     getUser();
@@ -122,6 +127,7 @@ class DashModel extends ChangeNotifier {
     notifyListeners();
     if (_dashBoardBox != null) {
       await getDashBox();
+      await getAnnouncements();
     }
     await prefs.setInt('language', language);
     notifyListeners();
@@ -151,6 +157,7 @@ class DashModel extends ChangeNotifier {
     await getMeters();
     await getBills();
     await getDashBox();
+    await getAnnouncements();
     notifyListeners();
     _isLoading = false;
     notifyListeners();
@@ -180,8 +187,6 @@ class DashModel extends ChangeNotifier {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     await getToken();
     http.Response response = await client.post('$_url/addresses', body: {
-      'host_id': '${user.host}',
-      'user_id': '${prefs.getInt('user_id')}',
       'access_token': dash.token,
     });
 
@@ -267,6 +272,7 @@ class DashModel extends ChangeNotifier {
       await getMeters();
       await getBills();
       await getDashBox();
+      await getAnnouncements();
       getFlashText(false);
       notifyListeners();
     } catch (e) {
@@ -351,9 +357,11 @@ class DashModel extends ChangeNotifier {
 
   Future<void> getMeters() async {
     await getToken();
-    http.Response response = await client.post(
-        '$_url/meters/${_selectedAddress.id}?access_token=${dash.token}&language=${_langs.data[dash.language].code.toLowerCase()}',
-        body: {'host_id': '${user.host}'});
+    http.Response response =
+        await client.post('$_url/meters/${_selectedAddress.id}', body: {
+      'access_token': dash.token,
+      'language': _langs.data[dash.language].code.toLowerCase()
+    });
     if (response.statusCode == 200) {
       _meters = Meters.fromJson(json.decode(response.body));
       notifyListeners();
@@ -365,8 +373,12 @@ class DashModel extends ChangeNotifier {
   Future<void> getBills() async {
     await getToken();
     http.Response response = await client.post(
-      '$_url/bills/${_selectedAddress.id}?access_token=${dash.token}&language=${_langs.data[dash.language].code.toLowerCase()}',
-      body: {'host_id': '${user.host}', 'id': '${_selectedAddress.id}'},
+      '$_url/bills/${_selectedAddress.id}}',
+      body: {
+        'id': '${_selectedAddress.id}',
+        'language': _langs.data[dash.language].code.toLowerCase(),
+        'access_token': dash.token
+      },
     );
     if (response.statusCode == 200) {
       _bills = Bills.fromJson(json.decode(response.body));
@@ -377,16 +389,14 @@ class DashModel extends ChangeNotifier {
   }
 
   Future<void> getDashBox() async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
     await getToken();
-    http.Response response = await client.post(
-        '$_url/dashboard/${_selectedAddress.id}?access_token=${dash.token}',
-        body: {
-          'host_id': '${user.host}',
-//          'user_id': '${prefs.getInt('user_id')}',
-          'id': '${_selectedAddress.id}',
-          'language': _langs.data[dash.language].code.toLowerCase(),
-        });
+    print(_selectedAddress.id);
+    http.Response response =
+        await client.post('$_url/dashboard/${_selectedAddress.id}', body: {
+      'id': '${_selectedAddress.id}',
+      'language': _langs.data[dash.language].code.toLowerCase(),
+      'access_token': dash.token
+    });
     if (response.statusCode == 200) {
       _dashBoardBox = DashBoardBox.fromJson(json.decode(response.body));
       notifyListeners();
@@ -396,10 +406,10 @@ class DashModel extends ChangeNotifier {
   }
 
   Future<bool> sendReading(var reading) async {
-    http.Response response = await client
-        .post('$_url/meters-reading/${_selectedMeter.id}/$reading', body: {
-      'host_id': '${user.host}',
-    });
+    await getToken();
+    http.Response response = await client.post(
+        '$_url/meters-reading/${_selectedMeter.id}/$reading',
+        body: { 'access_token': dash.token});
     if (response.statusCode == 200) {
       if (json.decode(response.body)['data']['success'] != null &&
           json.decode(response.body)['data']['success'] == true) {
@@ -455,5 +465,50 @@ class DashModel extends ChangeNotifier {
     } else {
       throw Exception('Failed to get translations');
     }
+  }
+
+  Future<void> getAnnouncements() async {
+    await getToken();
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    http.Response response = await client.post('$_url/announcements', body: {
+      'adr_id': '${_selectedAddress.id}',
+      'access_token': dash.token,
+      'language': _langs.data[dash.language].code.toLowerCase(),
+    });
+    if (response.statusCode == 200) {
+      _announcements = Announcements.fromJson(json.decode(response.body));
+      notifyListeners();
+    } else {
+      throw Exception('Failed retrieving announcements');
+    }
+  }
+
+  Future<void> readAnnouncement() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    http.Response response =
+        await client.post('$_url/announcement_read', body: {
+      'user_id': '${prefs.getInt('user_id')}',
+      'announcement_id': '${_selectedAnnouncement.id}',
+      'access_token': dash.token,
+      'host_id': '${user.host}',
+    });
+    if (response.statusCode == 200) {
+      if (json.decode(response.body)['data']['success']) {
+        return;
+      }
+    }
+    throw Exception('Failed reading the announcement');
+  }
+
+  Future<void> updateSelectedAnnouncement(
+      AnnouncementData announcementData) async {
+    _isLoading = true;
+    notifyListeners();
+    _selectedAnnouncement = announcementData;
+    notifyListeners();
+    await readAnnouncement();
+    await getAnnouncements();
+    _isLoading = false;
+    notifyListeners();
   }
 }

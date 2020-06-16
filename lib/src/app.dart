@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:webnams_app_v3/src/models/dashboard/dashboard_model.dart';
 import 'package:webnams_app_v3/src/models/user/user_model.dart';
+import 'package:webnams_app_v3/src/screens/announcement_details.dart';
+import 'package:webnams_app_v3/src/screens/announcements.dart';
 import 'package:webnams_app_v3/src/screens/bill.dart';
 import 'package:webnams_app_v3/src/screens/login.dart';
 import 'package:webnams_app_v3/src/screens/password.dart';
@@ -59,6 +61,8 @@ class App extends StatelessWidget {
             '/pdf': (context) => PdfView(),
             '/settings': (context) => Settings(),
             '/meter_picker': (context) => MeterPicker(),
+            '/announcements': (context) => Announcements(),
+            '/announcement_details': (context) => AnnouncementDetails()
           },
         ),
       ),

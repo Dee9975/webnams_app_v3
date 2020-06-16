@@ -23,13 +23,13 @@ class More extends StatelessWidget {
 //      ),
 //        onPressed: () => print('aptaujas'),
 //      ),
-//      InfoBox(
-//        text: Text(
-//            'Paziņojumi',
-//            style: TextStyle(fontSize: 16.0, color: hexToColor('#222e42'),)
-//        ),
-//        onPressed: () => print('aptaujas'),
-//      ),
+      InfoBox(
+        text: Text(
+            'Paziņojumi',
+            style: TextStyle(fontSize: 16.0, color: hexToColor('#222e42'),)
+        ),
+        onPressed: () => Navigator.pushNamed(context, '/announcements'),
+      ),
 //      InfoBox(
 //        text: Text(
 //            'Saziņa',
