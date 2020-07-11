@@ -12,6 +12,7 @@ import 'package:webnams_app_v3/src/models/auth/token.dart';
 import 'package:webnams_app_v3/src/models/bills/bills.dart';
 import 'package:webnams_app_v3/src/models/bills/data.dart';
 import 'package:webnams_app_v3/src/models/dashboard/dashboard.dart';
+import 'package:webnams_app_v3/src/models/image_model.dart';
 import 'package:webnams_app_v3/src/models/language/language_model.dart';
 import 'package:webnams_app_v3/src/models/language/translation_model.dart';
 import 'package:webnams_app_v3/src/models/meters/data.dart';
@@ -21,6 +22,7 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:webnams_app_v3/src/models/user/user.dart';
+import 'package:webnams_app_v3/src/resources/db_provider.dart';
 
 import 'dash_box.dart';
 
@@ -53,6 +55,8 @@ class DashModel extends ChangeNotifier {
   String _debugError;
   Announcements _announcements;
   AnnouncementData _selectedAnnouncement;
+  String _meterSendText;
+  ImageModel _selectedImage;
 
   String get error => _error;
   bool get hasError => _hasError;
@@ -76,6 +80,8 @@ class DashModel extends ChangeNotifier {
   String get debugError => _debugError;
   Announcements get announcements => _announcements;
   AnnouncementData get selectedAnnouncement => _selectedAnnouncement;
+  String get meterSendText => _meterSendText;
+  ImageModel get selectedImage => _selectedImage;
 
   DashModel() {
     getUser();
@@ -172,9 +178,11 @@ class DashModel extends ChangeNotifier {
     notifyListeners();
   }
 
-  void updateSelectedMeter(MeterData meter) {
+  Future<void> updateSelectedMeter(MeterData meter) async {
     _selectedMeter = meter;
     _maxLength = _selectedMeter.signsBefore + _selectedMeter.signsAfter;
+    notifyListeners();
+    await getImage();
     notifyListeners();
   }
 
@@ -237,10 +245,6 @@ class DashModel extends ChangeNotifier {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     var userData = prefs.getString('username');
     var langData = prefs.getInt('language');
-    if (langData == null) {
-      prefs.setInt('language', 0);
-      dash.language = prefs.getInt('language');
-    }
     if (userData == null) {
       _isLoading = true;
       notifyListeners();
@@ -390,7 +394,6 @@ class DashModel extends ChangeNotifier {
 
   Future<void> getDashBox() async {
     await getToken();
-    print(_selectedAddress.id);
     http.Response response =
         await client.post('$_url/dashboard/${_selectedAddress.id}', body: {
       'id': '${_selectedAddress.id}',
@@ -409,10 +412,12 @@ class DashModel extends ChangeNotifier {
     await getToken();
     http.Response response = await client.post(
         '$_url/meters-reading/${_selectedMeter.id}/$reading',
-        body: { 'access_token': dash.token});
+        body: { 'access_token': dash.token, "language": _langs.data[dash.language].code.toLowerCase()});
     if (response.statusCode == 200) {
       if (json.decode(response.body)['data']['success'] != null &&
           json.decode(response.body)['data']['success'] == true) {
+        _meterSendText = json.decode(response.body)['data']['msg'];
+        notifyListeners();
         return true;
       }
     }
@@ -434,7 +439,7 @@ class DashModel extends ChangeNotifier {
     String url;
     String filename;
 
-    url = _selectedBill.files.invoice.url;
+    url = _selectedBill.files.invoice.url + "&access_token=${dash.token}";
     filename = _selectedBill.files.invoice.name;
     var request = await HttpClient().getUrl(Uri.parse(url));
     var response = await request.close();
@@ -469,7 +474,6 @@ class DashModel extends ChangeNotifier {
 
   Future<void> getAnnouncements() async {
     await getToken();
-    SharedPreferences prefs = await SharedPreferences.getInstance();
     http.Response response = await client.post('$_url/announcements', body: {
       'adr_id': '${_selectedAddress.id}',
       'access_token': dash.token,
@@ -508,7 +512,32 @@ class DashModel extends ChangeNotifier {
     notifyListeners();
     await readAnnouncement();
     await getAnnouncements();
+    await getDashBox();
     _isLoading = false;
+    notifyListeners();
+  }
+
+  Future<void> getImage() async {
+    final DbProvider dbProvider = DbProvider.instance;
+    ImageModel result = await dbProvider.queryImage(_selectedMeter.id);
+    if (result != null) {
+      _selectedImage = result;
+      notifyListeners();
+      return;
+    }
+    _selectedImage = null;
+    notifyListeners();
+  }
+
+  Future<void> updateSelectedImage({ImageModel image, bool delete = false}) async {
+    final DbProvider dbProvider = DbProvider.instance;
+    if (delete != null && delete) {
+      await dbProvider.delete(_selectedMeter.id);
+      _selectedImage = null;
+      notifyListeners();
+      return;
+    }
+    _selectedImage = image;
     notifyListeners();
   }
 }

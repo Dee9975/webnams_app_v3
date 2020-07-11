@@ -7,6 +7,7 @@ import 'package:webnams_app_v3/src/models/meters/data.dart';
 import 'package:webnams_app_v3/src/resources/colors.dart';
 import 'package:webnams_app_v3/src/resources/decimal.dart';
 import 'package:webnams_app_v3/src/resources/my_flutter_app_icons.dart';
+import 'package:webnams_app_v3/src/screens/picker.dart';
 
 const Color _kKeyUmbraOpacity = Color(0x33000000); // alpha = 0.2
 const Color _kKeyPenumbraOpacity = Color(0x24000000); // alpha = 0.14
@@ -97,8 +98,8 @@ class _SliverMetersState extends State<SliverMeters>
           dashState.selectedMeter.lastReading != null &&
           dashState.selectedMeter.lastReading['value'] != 0) {
         if ((dashState.selectedMeter.lastReading['value'] +
-            (dashState.selectedMeter.avgReading['value'] * 2)) >
-            double.parse(getMax()) &&
+                    (dashState.selectedMeter.avgReading['value'] * 2)) >
+                double.parse(getMax()) &&
             reading < dashState.selectedMeter.lastReading['value']) {
           dashState.updateWarning(
               dashState.getTranslation(code: 'mob_app_reading_too_low'));
@@ -135,8 +136,9 @@ class _SliverMetersState extends State<SliverMeters>
 
   @override
   Widget build(BuildContext context) {
-    void updateSelectedMeter(MeterData meter) {
-      Provider.of<DashModel>(context, listen: false).updateSelectedMeter(meter);
+    Future<void> updateSelectedMeter(MeterData meter) async {
+      await Provider.of<DashModel>(context, listen: false)
+          .updateSelectedMeter(meter);
     }
 
     final double shortestSide = MediaQuery.of(context).size.shortestSide;
@@ -723,13 +725,19 @@ class _SliverMetersState extends State<SliverMeters>
                                                   fontWeight: FontWeight.w600),
                                             ),
                                             onPressed: () async {
-                                              updateSelectedMeter(
+                                              await updateSelectedMeter(
                                                   Provider.of<DashModel>(
                                                           context,
                                                           listen: false)
                                                       .meters
                                                       .data[index]);
-                                              _metersDialog();
+                                              Navigator.push(
+                                                  context,
+                                                  MaterialPageRoute(
+                                                      builder: (context) =>
+                                                          MeterPicker(
+                                                            selectedMeter: dashState.meters.data[index],
+                                                          )));
                                             },
                                             // onPressed: _isButtonDisabled ? null : _updateEmail,
                                           ),
@@ -760,13 +768,18 @@ class _SliverMetersState extends State<SliverMeters>
                                                   fontWeight: FontWeight.w600),
                                             ),
                                             onPressed: () async {
-                                              updateSelectedMeter(
+                                              await updateSelectedMeter(
                                                   Provider.of<DashModel>(
                                                           context,
                                                           listen: false)
                                                       .meters
                                                       .data[index]);
-                                              _metersDialog();
+                                              Navigator.push(
+                                                  context,
+                                                  MaterialPageRoute(
+                                                      builder: (context) => MeterPicker(
+                                                        selectedMeter: dashState.meters.data[index],
+                                                      )));
                                             },
                                             // onPressed: _isButtonDisabled ? null : _updateEmail,
                                           ),
@@ -1068,13 +1081,20 @@ class _SliverMetersState extends State<SliverMeters>
                                                   fontWeight: FontWeight.w600),
                                             ),
                                             onPressed: () async {
-                                              updateSelectedMeter(
+                                              await updateSelectedMeter(
                                                   Provider.of<DashModel>(
                                                           context,
                                                           listen: false)
                                                       .meters
                                                       .data[index]);
-                                              _metersDialog();
+                                              Navigator.push(
+                                                  context,
+                                                  MaterialPageRoute(
+                                                      builder: (context) =>
+                                                          MeterPicker(
+                                                            selectedMeter: dashState.meters.data[index],
+                                                          )));
+                                              ;
                                             },
                                             // onPressed: _isButtonDisabled ? null : _updateEmail,
                                           ),
@@ -1108,13 +1128,18 @@ class _SliverMetersState extends State<SliverMeters>
                                                   fontWeight: FontWeight.w600),
                                             ),
                                             onPressed: () async {
-                                              updateSelectedMeter(
+                                              await updateSelectedMeter(
                                                   Provider.of<DashModel>(
                                                           context,
                                                           listen: false)
                                                       .meters
                                                       .data[index]);
-                                              _metersDialog();
+                                              Navigator.push(
+                                                  context,
+                                                  MaterialPageRoute(
+                                                      builder: (context) => MeterPicker(
+                                                        selectedMeter: dashState.meters.data[index],
+                                                      )));
                                             },
                                             // onPressed: _isButtonDisabled ? null : _updateEmail,
                                           ),

@@ -17,6 +17,11 @@ class _SplashState extends State<Splash> {
     Future.microtask(() async {
       SharedPreferences prefs = await SharedPreferences.getInstance();
       await Provider.of<DashModel>(context, listen: false).getLanguages();
+      Locale locale = Localizations.localeOf(context);
+      if (!prefs.containsKey('language')) {
+        prefs.setInt('language', locale.languageCode == 'lv' ? 0 : locale.languageCode == 'en' ? 1 : locale.languageCode == 'ru' ? 2 : 0);
+        Provider.of<DashModel>(context, listen: false).updateSelectedLanguage(prefs.getInt('language'));
+      }
       if (prefs.containsKey('userExists') && prefs.getBool('userExists')) {
         Navigator.pushNamed(context, '/dashboard');
       } else {

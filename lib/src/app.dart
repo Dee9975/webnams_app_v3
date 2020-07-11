@@ -1,3 +1,4 @@
+import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:webnams_app_v3/src/models/dashboard/dashboard_model.dart';
@@ -6,6 +7,7 @@ import 'package:webnams_app_v3/src/screens/announcement_details.dart';
 import 'package:webnams_app_v3/src/screens/announcements.dart';
 import 'package:webnams_app_v3/src/screens/bill.dart';
 import 'package:webnams_app_v3/src/screens/login.dart';
+import 'package:webnams_app_v3/src/screens/meters_camera.dart';
 import 'package:webnams_app_v3/src/screens/password.dart';
 import 'package:webnams_app_v3/src/screens/pdf_view.dart';
 import 'package:webnams_app_v3/src/screens/picker.dart';
@@ -18,11 +20,16 @@ import 'package:webnams_app_v3/src/screens/languages.dart';
 import 'package:flutter_statusbarcolor/flutter_statusbarcolor.dart';
 
 class App extends StatelessWidget {
+  final CameraDescription camera;
+
+  App(this.camera);
+
   Widget build(BuildContext context) {
     SystemChrome.setPreferredOrientations([
       DeviceOrientation.portraitUp,
       DeviceOrientation.portraitDown
     ]);
+
     FlutterStatusbarcolor.setNavigationBarWhiteForeground(true);
     return MultiProvider(
       providers: [
@@ -62,7 +69,8 @@ class App extends StatelessWidget {
             '/settings': (context) => Settings(),
             '/meter_picker': (context) => MeterPicker(),
             '/announcements': (context) => Announcements(),
-            '/announcement_details': (context) => AnnouncementDetails()
+            '/announcement_details': (context) => AnnouncementDetails(),
+            '/meters_camera': (context) => MetersCamera(camera: camera)
           },
         ),
       ),

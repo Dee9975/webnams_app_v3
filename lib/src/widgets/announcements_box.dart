@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:webnams_app_v3/src/models/announcements/announcements.dart';
-import 'package:webnams_app_v3/src/models/dashboard/dashAnnouncements.dart';
 import 'package:webnams_app_v3/src/models/dashboard/dashboard_model.dart';
 import 'package:webnams_app_v3/src/resources/colors.dart';
 
@@ -11,13 +10,13 @@ const Color _kAmbientShadowOpacity = Color(0x1F000000); // alpha = 0.12
 
 class AnnouncementsBox extends StatelessWidget {
   final AnnouncementData data;
-  const AnnouncementsBox(this.data);
+  AnnouncementsBox(this.data);
 
   @override
   Widget build(BuildContext context) {
     return Container(
       width: double.infinity,
-      margin: EdgeInsets.only(left: 8.0, right: 8.0, top: 8.0),
+      margin: EdgeInsets.only(left: 8.0, right: 8.0, bottom: 8.0),
       decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(10),
           color: Colors.white,

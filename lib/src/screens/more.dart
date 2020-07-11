@@ -25,7 +25,7 @@ class More extends StatelessWidget {
 //      ),
       InfoBox(
         text: Text(
-            'Paziņojumi',
+            dashModel.getTranslation(code: 'mob_app_announcements'),
             style: TextStyle(fontSize: 16.0, color: hexToColor('#222e42'),)
         ),
         onPressed: () => Navigator.pushNamed(context, '/announcements'),
@@ -46,7 +46,7 @@ class More extends StatelessWidget {
 //      ),
       InfoBox(
         text: Text(
-            'Uzstādījumi',
+            dashModel.getTranslation(code: 'mob_app_menu_settings'),
             style: TextStyle(fontSize: 16.0, color: hexToColor('#222e42'),)
         ),
         onPressed: () => Navigator.pushNamed(context, '/settings'),
@@ -67,7 +67,7 @@ class More extends StatelessWidget {
 //      ),
       InfoBox(
         text: Text(
-            'Valodas',
+            dashModel.getTranslation(code: 'mob_app_menu_languages'),
             style: TextStyle(fontSize: 16.0, color: hexToColor('#222e42'),)
         ),
         onPressed: () => Navigator.pushNamed(context, '/languages'),
