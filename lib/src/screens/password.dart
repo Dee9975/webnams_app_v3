@@ -47,7 +47,14 @@ class _PasswordState extends State<Password> {
           .updatePassword(password);
       await dashState.getUser();
       if (dashState.hasError) {
-        Provider.of<UserData>(context).updateError(true, dashState.error);
+        showDialog(context: context, builder: (context) {
+          return AlertDialog(
+            title: Text(dashState.error?? "Error tings innit"),
+          );
+        });
+      }
+      if (dashState.hasError) {
+        Provider.of<UserData>(context, listen: false).updateError(true, dashState.error);
         setState(() {
           _loading = false;
         });

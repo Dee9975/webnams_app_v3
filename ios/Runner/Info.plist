@@ -25,6 +25,10 @@
 	<string>$(FLUTTER_BUILD_NUMBER)</string>
 	<key>LSRequiresIPhoneOS</key>
 	<true/>
+	<key>UIBackgroundModes</key>
+        <array>
+            <string>remote-notification</string>
+        </array>
 	<key>NSCameraUsageDescription</key>
 	<string>The camera is used to take a picture of the meter to then compare with the reading input</string>
 	<key>UILaunchStoryboardName</key>

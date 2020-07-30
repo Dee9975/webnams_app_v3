@@ -1,4 +1,5 @@
 import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
+import 'package:intl/intl.dart';
 import 'package:torch_compat/torch_compat.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -7,6 +8,7 @@ import 'package:webnams_app_v3/src/models/meters/data.dart';
 import 'package:webnams_app_v3/src/resources/colors.dart';
 import 'package:webnams_app_v3/src/resources/decimal.dart';
 import 'package:webnams_app_v3/src/resources/my_flutter_app_icons.dart';
+import 'package:webnams_app_v3/src/resources/translations.dart';
 import 'package:webnams_app_v3/src/screens/picker.dart';
 
 const Color _kKeyUmbraOpacity = Color(0x33000000); // alpha = 0.2
@@ -145,6 +147,33 @@ class _SliverMetersState extends State<SliverMeters>
     final bool isTablet = shortestSide > 600;
     final dashState = Provider.of<DashModel>(context);
 
+    Future<void> refreshMeters() async {
+      await Provider.of<DashModel>(context, listen: false).refreshMeters();
+      if (Provider.of<DashModel>(context, listen: false).hasError) {
+        Map<String, String> modalTranslations = hardcodedTranslation(
+            Provider.of<DashModel>(context, listen: false).dash.language ?? 0,
+            Provider.of<DashModel>(context, listen: false).errorType ??
+                "timeout");
+        showDialog(
+            context: context,
+            builder: (context) {
+              return AlertDialog(
+                title: Text(modalTranslations["title"]),
+                content: Text(Provider.of<DashModel>(context).error ?? "Error"),
+                actions: [
+                  FlatButton(
+                    onPressed: () async {
+                      await refreshMeters();
+                      Navigator.pop(context);
+                    },
+                    child: Text(modalTranslations["button"]),
+                  ),
+                ],
+              );
+            });
+      }
+    }
+
     Future<void> updateFlash() async {
       bool hasTorch = await TorchCompat.hasTorch;
       setState(() {
@@ -173,7 +202,7 @@ class _SliverMetersState extends State<SliverMeters>
             await TorchCompat.turnOff();
             dashState.getFlashText(false);
           }
-          await dashState.refreshMeters();
+          await refreshMeters();
           Scaffold.of(context).showSnackBar(SnackBar(
             content: Text('Rādījums nodots!'),
             backgroundColor: hexToColor('#09cb64'),
@@ -183,278 +212,40 @@ class _SliverMetersState extends State<SliverMeters>
       }
     }
 
-    Future<void> _metersDialog() async {
-      String setPlaceholder() {
-        MeterData state =
-            Provider.of<DashModel>(context, listen: false).selectedMeter;
-        String val = '';
-        if (state.signsBefore != null && state.signsBefore > 0) {
-          for (int i = 0; i < state.signsBefore; i++) {
-            val += '0';
-          }
-        }
-        if (state.signsAfter != null && state.signsAfter > 0) {
-          val += '.';
-          for (int i = 0; i < state.signsAfter; i++) {
-            val += '0';
-          }
-        }
-        return val;
-      }
-
-      setState(() {
-        readingController.text = '';
-      });
-      dashState.updateWarning('');
-      showDialog(
-          barrierDismissible: false,
-          context: context,
-          builder: (BuildContext context) {
-            return AlertDialog(
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(10),
+    if (Provider.of<DashModel>(context).hasError) {
+      Map<String, String> modalTranslations = hardcodedTranslation(
+          Provider.of<DashModel>(context).dash.language ?? 0,
+          Provider.of<DashModel>(context).errorType ?? "timeout");
+      return Center(
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16.0),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Text(
+                modalTranslations["subtitle"],
+                textAlign: TextAlign.center,
+              ),
+              FlatButton(
+                child: Text(
+                  modalTranslations["button"],
+                  style: TextStyle(
+                      fontWeight: FontWeight.bold, color: Colors.blueAccent),
                 ),
-                contentPadding: EdgeInsets.all(0.0),
-                content: SingleChildScrollView(
-                  child: Container(
-                    width: double.infinity,
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: <Widget>[
-                        Padding(
-                          padding: const EdgeInsets.only(top: 24.0, left: 16.0),
-                          child: Text(
-                            dashState.getTranslation(
-                                code: 'mob_app_input_title'),
-                            style: TextStyle(
-                                fontSize: 22, fontWeight: FontWeight.w600),
-                            textAlign: TextAlign.left,
-                          ),
-                        ),
-                        Padding(
-                          padding: const EdgeInsets.only(left: 16.0, top: 5.0),
-                          child: Row(
-                            children: <Widget>[
-                              Text(
-                                Provider.of<DashModel>(context)
-                                    .selectedMeter
-                                    .type,
-                                style: TextStyle(
-                                    fontSize: 16.0,
-                                    fontWeight: FontWeight.w600),
-                              )
-                            ],
-                          ),
-                        ),
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: <Widget>[
-                            Padding(
-                              padding: const EdgeInsets.only(left: 16.0),
-                              child: Text(dashState.getTranslation(
-                                  code: 'mob_app_number')),
-                            ),
-                            Padding(
-                              padding: const EdgeInsets.only(right: 16.0),
-                              child: Text(
-                                '${dashState.selectedMeter.number}',
-                                style: TextStyle(fontWeight: FontWeight.w600),
-                              ),
-                            ),
-                          ],
-                        ),
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: <Widget>[
-                            Padding(
-                              padding: const EdgeInsets.only(left: 16.0),
-                              child: Text(dashState.getTranslation(
-                                  code: 'mob_app_last')),
-                            ),
-                            Padding(
-                              padding: const EdgeInsets.only(right: 16.0),
-                              child: Text(
-                                '${dashState.selectedMeter.lastReading['value'] ?? '0'}',
-                                style: TextStyle(fontWeight: FontWeight.w600),
-                              ),
-                            ),
-                          ],
-                        ),
-                        Container(
-                          height: 40,
-                          margin: EdgeInsets.only(top: 16.0),
-                          decoration: BoxDecoration(
-                              border: Border(
-                            top: BorderSide(color: hexToColor('#d6dde3')),
-                            bottom: BorderSide(color: hexToColor('#d6dde3')),
-                          )),
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            crossAxisAlignment: CrossAxisAlignment.center,
-                            children: <Widget>[
-                              Padding(
-                                padding: const EdgeInsets.only(left: 16.0),
-                                child: Text(dashState.getTranslation(
-                                    code: 'mob_app_new_input')),
-                              ),
-                              Container(
-                                width: 120,
-                                height: 40,
-                                child: TextField(
-                                  focusNode: _focusNode,
-                                  maxLength: Provider.of<DashModel>(context)
-                                          .maxLength +
-                                      (Provider.of<DashModel>(context)
-                                                  .selectedMeter
-                                                  .signsAfter !=
-                                              0
-                                          ? 1
-                                          : 0),
-                                  maxLengthEnforced: true,
-                                  textAlignVertical: TextAlignVertical.center,
-                                  textAlign: TextAlign.center,
-                                  keyboardType: TextInputType.numberWithOptions(
-                                      decimal: true),
-                                  controller: readingController,
-                                  inputFormatters: [
-                                    DecimalTextInputFormatter(
-                                        decimalRange:
-                                            Provider.of<DashModel>(context)
-                                                .selectedMeter
-                                                .signsAfter,
-                                        before: Provider.of<DashModel>(context)
-                                            .selectedMeter
-                                            .signsBefore)
-                                  ],
-                                  decoration: InputDecoration(
-                                      counterText: "",
-                                      contentPadding:
-                                          EdgeInsets.only(bottom: 13),
-                                      border: InputBorder.none,
-                                      hintText: _focusNode.hasPrimaryFocus
-                                          ? ''
-                                          : setPlaceholder()),
-                                ),
-                              )
-                            ],
-                          ),
-                        ),
-                        Provider.of<DashModel>(context).warning.isNotEmpty
-                            ? Padding(
-                                padding: const EdgeInsets.only(
-                                    left: 16.0, right: 16.0),
-                                child: Text(
-                                  Provider.of<DashModel>(context).warning,
-                                  style: TextStyle(color: Colors.red),
-                                  textAlign: TextAlign.center,
-                                ),
-                              )
-                            : Container(),
-                        Padding(
-                          padding: const EdgeInsets.only(
-                              left: 16.0, right: 16.0, top: 24.0),
-                          child: ButtonTheme(
-                            height: 40.0,
-                            minWidth: double.infinity,
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(24.0),
-                            ),
-                            buttonColor: hexToColor('#e5edf3'),
-                            child: RaisedButton(
-                              elevation: 0,
-                              child: Text(
-                                dashState.flashText == null
-                                    ? 'Test'
-                                    : dashState.flashText,
-                                style: TextStyle(
-                                    color: hexToColor('#3e4a5e'),
-                                    fontSize: 18.0,
-                                    fontWeight: FontWeight.w600),
-                              ),
-                              onPressed: () async {
-                                await updateFlash();
-                              },
-                              // onPressed: _isButtonDisabled ? null : _updateEmail,
-                            ),
-                          ),
-                        ),
-                        IgnorePointer(
-                          ignoring: _shouldIgnore,
-                          child: Padding(
-                            padding: const EdgeInsets.only(
-                                left: 16.0, right: 16.0, top: 8.0),
-                            child: ButtonTheme(
-                              height: 40.0,
-                              minWidth: double.infinity,
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(24.0),
-                              ),
-                              buttonColor: hexToColor('#23a0ff'),
-                              child: RaisedButton(
-                                elevation: 0,
-                                child: Text(
-                                  dashState.getTranslation(
-                                      code: 'mob_app_save'),
-                                  style: TextStyle(
-                                      color: Colors.white,
-                                      fontSize: 18.0,
-                                      fontWeight: FontWeight.w600),
-                                ),
-                                onPressed: () async {
-                                  await updateReading(readingController.text);
-                                },
-                                // onPressed: _isButtonDisabled ? null : _updateEmail,
-                              ),
-                            ),
-                          ),
-                        ),
-                        Padding(
-                          padding: const EdgeInsets.only(
-                              left: 16.0, right: 16.0, top: 8.0, bottom: 24.0),
-                          child: ButtonTheme(
-                            height: 40.0,
-                            minWidth: double.infinity,
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(24.0),
-                            ),
-                            buttonColor: hexToColor('#e5edf3'),
-                            child: RaisedButton(
-                              elevation: 0,
-                              child: Text(
-                                dashState.getTranslation(
-                                    code: 'mob_app_cancel'),
-                                style: TextStyle(
-                                    color: hexToColor('#3e4a5e'),
-                                    fontSize: 18.0,
-                                    fontWeight: FontWeight.w600),
-                              ),
-                              onPressed: () async {
-                                setState(() {
-                                  _flash = false;
-                                });
-                                if (await TorchCompat.hasTorch) {
-                                  await TorchCompat.turnOff();
-                                  dashState.getFlashText(false);
-                                }
-                                Navigator.pop(context);
-                              },
-                              // onPressed: _isButtonDisabled ? null : _updateEmail,
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ));
-          });
+                onPressed: () async {
+                  await refreshMeters();
+                },
+              ),
+            ],
+          ),
+        ),
+      );
     }
-
     Widget buildGrid() {
-      if (!Provider.of<DashModel>(context).isLoading) {
+      if (!Provider.of<DashModel>(context).isLoading &&
+          !Provider.of<DashModel>(context).hasError) {
         return RefreshIndicator(
-          onRefresh: () async =>
-              Provider.of<DashModel>(context, listen: false).refreshMeters(),
+          onRefresh: () async => refreshMeters(),
           child: CustomScrollView(
             slivers: <Widget>[
               SliverToBoxAdapter(
@@ -516,6 +307,12 @@ class _SliverMetersState extends State<SliverMeters>
                 crossAxisSpacing: 10.0,
                 staggeredTileBuilder: (int index) => new StaggeredTile.fit(1),
                 itemBuilder: (context, int index) {
+                  Color dateColor =
+                      DateTime.parse(dashState.meters.data[index].nextCheck)
+                                  .compareTo(DateTime.now()) >
+                              0
+                          ? Colors.red
+                          : hexToColor("#222e42");
                   return Container(
                     decoration: BoxDecoration(
                         borderRadius: BorderRadius.all(Radius.circular(10)),
@@ -610,11 +407,11 @@ class _SliverMetersState extends State<SliverMeters>
                                 Provider.of<DashModel>(context)
                                     .meters
                                     .data[index]
-                                    .lastReading['to'],
+                                    .nextCheck,
                                 style: TextStyle(
                                     fontSize: 16.0,
                                     fontWeight: FontWeight.w600,
-                                    color: hexToColor('#222e42')),
+                                    color: dateColor),
                               ),
                             ],
                           ),
@@ -734,10 +531,14 @@ class _SliverMetersState extends State<SliverMeters>
                                               Navigator.push(
                                                   context,
                                                   MaterialPageRoute(
-                                                      builder: (context) =>
-                                                          MeterPicker(
-                                                            selectedMeter: dashState.meters.data[index],
-                                                          )));
+                                                      builder:
+                                                          (context) =>
+                                                              MeterPicker(
+                                                                selectedMeter:
+                                                                    dashState
+                                                                        .meters
+                                                                        .data[index],
+                                                              )));
                                             },
                                             // onPressed: _isButtonDisabled ? null : _updateEmail,
                                           ),
@@ -777,9 +578,14 @@ class _SliverMetersState extends State<SliverMeters>
                                               Navigator.push(
                                                   context,
                                                   MaterialPageRoute(
-                                                      builder: (context) => MeterPicker(
-                                                        selectedMeter: dashState.meters.data[index],
-                                                      )));
+                                                      builder:
+                                                          (context) =>
+                                                              MeterPicker(
+                                                                selectedMeter:
+                                                                    dashState
+                                                                        .meters
+                                                                        .data[index],
+                                                              )));
                                             },
                                             // onPressed: _isButtonDisabled ? null : _updateEmail,
                                           ),
@@ -808,9 +614,7 @@ class _SliverMetersState extends State<SliverMeters>
     Widget buildList() {
       if (!Provider.of<DashModel>(context).isLoading) {
         return RefreshIndicator(
-          onRefresh: () async =>
-              await Provider.of<DashModel>(context, listen: false)
-                  .refreshMeters(),
+          onRefresh: () async => refreshMeters(),
           child: CustomScrollView(
             slivers: <Widget>[
               SliverToBoxAdapter(
@@ -869,6 +673,19 @@ class _SliverMetersState extends State<SliverMeters>
               ),
               SliverList(
                 delegate: SliverChildBuilderDelegate((context, int index) {
+                  DateFormat format = new DateFormat("d.m.y");
+                  Color dateColor = dashState.meters.data[index].nextCheck != "" ?
+                      format.parse(dashState.meters.data[index].nextCheck)
+                                  .compareTo(DateTime.now()) <
+                              0
+                          ? Colors.red
+                          : hexToColor("#222e42") : hexToColor("#222e42");
+                  Color dateLabelColor = dashState.meters.data[index].nextCheck != "" ?
+                  format.parse(dashState.meters.data[index].nextCheck)
+                      .compareTo(DateTime.now()) <
+                      0
+                      ? Colors.red
+                      : hexToColor("#8d96a4") : hexToColor("#8d96a4");
                   return Container(
                     decoration: BoxDecoration(
                         borderRadius: BorderRadius.all(Radius.circular(10)),
@@ -956,18 +773,18 @@ class _SliverMetersState extends State<SliverMeters>
                                 dashState.getTranslation(
                                     code: 'mob_app_expire'),
                                 style: TextStyle(
-                                    color: hexToColor('#8d96a4'),
+                                    color: dateLabelColor,
                                     fontSize: 16.0),
                               ),
                               Text(
                                 Provider.of<DashModel>(context)
                                     .meters
                                     .data[index]
-                                    .lastReading['to'],
+                                    .nextCheck,
                                 style: TextStyle(
                                     fontSize: 16.0,
                                     fontWeight: FontWeight.w600,
-                                    color: hexToColor('#222e42')),
+                                    color: dateColor),
                               ),
                             ],
                           ),
@@ -1090,10 +907,14 @@ class _SliverMetersState extends State<SliverMeters>
                                               Navigator.push(
                                                   context,
                                                   MaterialPageRoute(
-                                                      builder: (context) =>
-                                                          MeterPicker(
-                                                            selectedMeter: dashState.meters.data[index],
-                                                          )));
+                                                      builder:
+                                                          (context) =>
+                                                              MeterPicker(
+                                                                selectedMeter:
+                                                                    dashState
+                                                                        .meters
+                                                                        .data[index],
+                                                              )));
                                               ;
                                             },
                                             // onPressed: _isButtonDisabled ? null : _updateEmail,
@@ -1137,9 +958,14 @@ class _SliverMetersState extends State<SliverMeters>
                                               Navigator.push(
                                                   context,
                                                   MaterialPageRoute(
-                                                      builder: (context) => MeterPicker(
-                                                        selectedMeter: dashState.meters.data[index],
-                                                      )));
+                                                      builder:
+                                                          (context) =>
+                                                              MeterPicker(
+                                                                selectedMeter:
+                                                                    dashState
+                                                                        .meters
+                                                                        .data[index],
+                                                              )));
                                             },
                                             // onPressed: _isButtonDisabled ? null : _updateEmail,
                                           ),

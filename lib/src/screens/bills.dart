@@ -16,10 +16,28 @@ class Bills extends StatefulWidget {
 
 class _BillsState extends State<Bills> {
   bool add = false;
+  bool loading = false;
+  Future<void> updateSelectedBill(int index) async {
+    setState(() {
+      loading = true;
+      add = true;
+    });
+    Provider.of<DashModel>(context, listen: false)
+        .updateSelectedBill(
+        Provider.of<DashModel>(context, listen: false)
+            .bills
+            .data[index])
+        .then((value) {
+          setState(() {
+            loading = false;
+          });
+          Navigator.pushNamed(context, '/bill');
+    });
+  }
   @override
   Widget build(BuildContext context) {
     final dashState = Provider.of<DashModel>(context);
-    if (Provider.of<DashModel>(context).isLoading) {
+    if (loading || dashState.isLoading) {
       return Center(
         child: CircularProgressIndicator(),
       );
@@ -36,16 +54,8 @@ class _BillsState extends State<Bills> {
           return Offstage();
         }
         return GestureDetector(
-          onTap: () {
-            setState(() {
-              add = true;
-              Provider.of<DashModel>(context, listen: false)
-                  .updateSelectedBill(
-                  Provider.of<DashModel>(context, listen: false)
-                      .bills
-                      .data[index])
-                  .then((value) => Navigator.pushNamed(context, '/bill'));
-            });
+          onTap: () async {
+            await updateSelectedBill(index);
           },
           child: Container(
             width: double.infinity,

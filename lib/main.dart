@@ -13,5 +13,5 @@ void main() async {
     print(e);
   }
 
-  runApp(App(firstCamera));
+  runApp(App(camera: firstCamera));
 }
