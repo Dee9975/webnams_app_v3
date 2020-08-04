@@ -1,6 +1,3 @@
-import 'dart:io';
-
-import 'package:connectivity/connectivity.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -23,12 +20,6 @@ class _SplashState extends State<Splash> {
   );
   SplashState state = SplashState.loading;
   SplashState loggedInState;
-  Future<bool> connectionDialog() async {
-    var connectivityResult = await (new Connectivity().checkConnectivity());
-    bool connected = (connectivityResult == ConnectivityResult.wifi ||
-        connectivityResult == ConnectivityResult.mobile);
-    return connected;
-  }
 
   @override
   initState() {
@@ -117,8 +108,15 @@ class _SplashState extends State<Splash> {
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
+                Padding(
+                  padding: const EdgeInsets.only(bottom: 52.0),
+                  child: Container(
+                    width: 170,
+                    child: Image.asset("assets/network.png")
+                  ),
+                ),
                 Text(
-                  modalTranslations["subtitle"],
+                  modalTranslations["title"],
                   textAlign: TextAlign.center,
                 ),
                 FlatButton(
@@ -128,7 +126,7 @@ class _SplashState extends State<Splash> {
                         fontWeight: FontWeight.bold, color: Colors.blueAccent),
                   ),
                   onPressed: () async {
-                    await getData(true);
+                    await retryData();
                   },
                 ),
               ],
@@ -148,8 +146,9 @@ class _SplashState extends State<Splash> {
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
+                Image.asset("assets/network.png"),
                 Text(
-                  modalTranslations["subtitle"],
+                  modalTranslations["title"],
                   textAlign: TextAlign.center,
                 ),
                 FlatButton(

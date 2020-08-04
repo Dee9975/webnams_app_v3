@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:webnams_app_v3/src/models/dashboard/dashboard_model.dart';
 import 'package:webnams_app_v3/src/resources/colors.dart';
+import 'package:webnams_app_v3/src/screens/feedback.dart';
 
 class Settings extends StatelessWidget {
   @override

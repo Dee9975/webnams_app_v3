@@ -61,7 +61,9 @@ class DashModel extends ChangeNotifier {
   String _meterSendText;
   ImageModel _selectedImage;
   String _errorType;
+  String _success;
 
+  String get success => _success;
   String get errorType => _errorType;
   String get error => _error;
   bool get hasError => _hasError;
@@ -781,5 +783,37 @@ class DashModel extends ChangeNotifier {
     }
     _selectedImage = image;
     notifyListeners();
+  }
+
+  Future<bool> sendFeedback(String feedback) async {
+    try {
+      await getToken();
+      http.Response response = await networkProvider.post(uri: "/feedback", body: {
+        "access_token": dash.token,
+        "feedback": feedback,
+        "language": _langs.data[dash.language].code.toLowerCase()
+      });
+
+      if (response.statusCode == 200) {
+        _error = "";
+        _success = json.decode(response.body)["data"]["message"];
+        notifyListeners();
+        return true;
+      }
+      _error = json.decode(response.body)["error"];
+      notifyListeners();
+      return false;
+    } on TimeoutException catch (_) {
+      _error = hardcodedTranslation(dash.language, "timeout")["title"];
+      notifyListeners();
+      return false;
+    } on NoInternetException catch (_) {
+      _error = hardcodedTranslation(dash.language, "internet_loss")["title"];
+      notifyListeners();
+      return false;
+    } catch (e) {
+      return false;
+    }
+
   }
 }

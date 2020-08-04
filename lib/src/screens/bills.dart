@@ -34,6 +34,16 @@ class _BillsState extends State<Bills> {
           Navigator.pushNamed(context, '/bill');
     });
   }
+
+  Future<void> refreshBills() async {
+    setState(() {
+      loading = true;
+    });
+    await Provider.of<DashModel>(context, listen: false).getBills();
+    setState(() {
+      loading = false;
+    });
+  }
   @override
   Widget build(BuildContext context) {
     final dashState = Provider.of<DashModel>(context);
@@ -47,113 +57,116 @@ class _BillsState extends State<Bills> {
         child: Text(dashState.bills.message),
       );
     }
-    return ListView.builder(
-      itemCount: Provider.of<DashModel>(context).bills.rows,
-      itemBuilder: (context, int index) {
-        if (Provider.of<DashModel>(context).bills.data[index].type == 5) {
-          return Offstage();
-        }
-        return GestureDetector(
-          onTap: () async {
-            await updateSelectedBill(index);
-          },
-          child: Container(
-            width: double.infinity,
-            margin: EdgeInsets.only(left: 8.0, right: 8.0, bottom: 8.0),
-            decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(10),
-                color: Colors.white,
-                boxShadow: [
-                  BoxShadow(
-                      offset: Offset(0.0, 2.0),
-                      blurRadius: 1.0,
-                      spreadRadius: -1.0,
-                      color: _kKeyUmbraOpacity),
-                  BoxShadow(
-                      offset: Offset(0.0, 1.0),
-                      blurRadius: 1.0,
-                      spreadRadius: 0.0,
-                      color: _kKeyPenumbraOpacity),
-                  BoxShadow(
-                      offset: Offset(0.0, 1.0),
-                      blurRadius: 3.0,
-                      spreadRadius: 0.0,
-                      color: _kAmbientShadowOpacity),
-                ]),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: <Widget>[
-                Row(
-                  children: <Widget>[
-                    Padding(
-                      padding: const EdgeInsets.only(left: 16.0, top: 10.0),
-                      child: Icon(
-                        MyFlutterApp.rekins,
-                        color: hexToColor('#8d96a4'),
-                        size: 18,
-                      ),
-                    ),
-                    Padding(
-                      padding: const EdgeInsets.only(top: 8.0),
-                      child: Provider.of<DashModel>(context)
-                                  .bills
-                                  .data[index]
-                                  .amountUnpayd <=
-                              0
-                          ? Text(
-                              dashState.getTranslation(code: 'mob_app_paid'),
-                              style: TextStyle(
-                                  fontSize: 16.0,
-                                  fontWeight: FontWeight.w600,
-                                  color: hexToColor('#8d96a4')),
-                            )
-                          : Text(
-                              dashState.getTranslation(code: 'mob_app_unpaid'),
-                              style: TextStyle(
-                                  fontSize: 16.0,
-                                  fontWeight: FontWeight.w600,
-                                  color: hexToColor('#8d96a4')),
-                            ),
-                    ),
-                  ],
-                ),
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+    return RefreshIndicator(
+      onRefresh: refreshBills,
+      child: ListView.builder(
+        itemCount: Provider.of<DashModel>(context).bills.rows,
+        itemBuilder: (context, int index) {
+          if (Provider.of<DashModel>(context).bills.data[index].type == 5) {
+            return Offstage();
+          }
+          return GestureDetector(
+            onTap: () async {
+              await updateSelectedBill(index);
+            },
+            child: Container(
+              width: double.infinity,
+              margin: EdgeInsets.only(left: 8.0, right: 8.0, bottom: 8.0),
+              decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(10),
+                  color: Colors.white,
+                  boxShadow: [
+                    BoxShadow(
+                        offset: Offset(0.0, 2.0),
+                        blurRadius: 1.0,
+                        spreadRadius: -1.0,
+                        color: _kKeyUmbraOpacity),
+                    BoxShadow(
+                        offset: Offset(0.0, 1.0),
+                        blurRadius: 1.0,
+                        spreadRadius: 0.0,
+                        color: _kKeyPenumbraOpacity),
+                    BoxShadow(
+                        offset: Offset(0.0, 1.0),
+                        blurRadius: 3.0,
+                        spreadRadius: 0.0,
+                        color: _kAmbientShadowOpacity),
+                  ]),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: <Widget>[
+                  Row(
                     children: <Widget>[
-                      Text(
-                        '${dashState.getTranslation(code: 'mob_app_bill_nr')}: ${Provider.of<DashModel>(context).bills.data[index].number}',
-                        style: TextStyle(fontSize: 16.0),
+                      Padding(
+                        padding: const EdgeInsets.only(left: 16.0, top: 10.0),
+                        child: Icon(
+                          MyFlutterApp.rekins,
+                          color: hexToColor('#8d96a4'),
+                          size: 18,
+                        ),
                       ),
-                      Text(
-                        '${Provider.of<DashModel>(context).bills.data[index].amountToPay} €',
-                        style: TextStyle(
-                            fontSize: 16.0, fontWeight: FontWeight.w600),
-                      )
-                    ],
-                  ),
-                ),
-                Padding(
-                  padding: EdgeInsets.only(left: 16.0, bottom: 16.0),
-                  child: Text(
-                    '${dashState.getTranslation(code: 'mob_app_due')}: ${Provider.of<DashModel>(context).bills.data[index].date}',
-                    style: TextStyle(
-                        fontSize: 16.0,
-                        color: Provider.of<DashModel>(context)
+                      Padding(
+                        padding: const EdgeInsets.only(top: 8.0),
+                        child: Provider.of<DashModel>(context)
                                     .bills
                                     .data[index]
                                     .amountUnpayd <=
                                 0
-                            ? hexToColor('#8d96a4')
-                            : hexToColor('#ff1303')),
+                            ? Text(
+                                dashState.getTranslation(code: 'mob_app_paid'),
+                                style: TextStyle(
+                                    fontSize: 16.0,
+                                    fontWeight: FontWeight.w600,
+                                    color: hexToColor('#8d96a4')),
+                              )
+                            : Text(
+                                dashState.getTranslation(code: 'mob_app_unpaid'),
+                                style: TextStyle(
+                                    fontSize: 16.0,
+                                    fontWeight: FontWeight.w600,
+                                    color: hexToColor('#8d96a4')),
+                              ),
+                      ),
+                    ],
                   ),
-                )
-              ],
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: <Widget>[
+                        Text(
+                          '${dashState.getTranslation(code: 'mob_app_bill_nr')}: ${Provider.of<DashModel>(context).bills.data[index].number}',
+                          style: TextStyle(fontSize: 16.0),
+                        ),
+                        Text(
+                          '${Provider.of<DashModel>(context).bills.data[index].amountToPay} €',
+                          style: TextStyle(
+                              fontSize: 16.0, fontWeight: FontWeight.w600),
+                        )
+                      ],
+                    ),
+                  ),
+                  Padding(
+                    padding: EdgeInsets.only(left: 16.0, bottom: 16.0),
+                    child: Text(
+                      '${dashState.getTranslation(code: 'mob_app_due')}: ${Provider.of<DashModel>(context).bills.data[index].date}',
+                      style: TextStyle(
+                          fontSize: 16.0,
+                          color: Provider.of<DashModel>(context)
+                                      .bills
+                                      .data[index]
+                                      .amountUnpayd <=
+                                  0
+                              ? hexToColor('#8d96a4')
+                              : hexToColor('#ff1303')),
+                    ),
+                  )
+                ],
+              ),
             ),
-          ),
-        );
-      },
+          );
+        },
+      ),
     );
   }
 }

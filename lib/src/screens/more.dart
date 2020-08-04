@@ -4,6 +4,8 @@ import 'package:webnams_app_v3/src/models/dashboard/dashboard_model.dart';
 import 'package:webnams_app_v3/src/resources/colors.dart';
 import 'package:webnams_app_v3/src/widgets/info_box.dart';
 
+import 'feedback.dart';
+
 class More extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
@@ -71,6 +73,15 @@ class More extends StatelessWidget {
             style: TextStyle(fontSize: 16.0, color: hexToColor('#222e42'),)
         ),
         onPressed: () => Navigator.pushNamed(context, '/languages'),
+      ),
+      InfoBox(
+        text: Text(
+            dashModel.getTranslation(code: 'mob_app_feedback'),
+            style: TextStyle(fontSize: 16.0, color: hexToColor('#222e42'),)
+        ),
+        onPressed: () =>  Navigator.push(context, MaterialPageRoute(
+            builder: (context) => FeedbackScreen(anonymous: false,)
+        )),
       ),
     ];
     

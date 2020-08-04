@@ -2,7 +2,6 @@ import 'dart:async';
 import 'dart:io';
 
 import 'package:camera/camera.dart';
-import 'package:connectivity/connectivity.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:webnams_app_v3/src/models/dashboard/dashboard_model.dart';
@@ -23,7 +22,6 @@ import 'package:webnams_app_v3/src/screens/dashboard.dart';
 import 'package:webnams_app_v3/src/screens/languages.dart';
 import 'package:flutter_statusbarcolor/flutter_statusbarcolor.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
-import 'package:connectivity/connectivity.dart';
 
 class App extends StatefulWidget {
   final CameraDescription camera;

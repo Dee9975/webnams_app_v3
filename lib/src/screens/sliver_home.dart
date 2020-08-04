@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_app_badger/flutter_app_badger.dart';
 import 'package:provider/provider.dart';
 import 'package:webnams_app_v3/src/models/announcements/announcements.dart';
 import 'package:webnams_app_v3/src/models/dashboard/dashboard_model.dart';

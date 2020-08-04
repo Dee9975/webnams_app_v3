@@ -50,6 +50,7 @@ class _LoginState extends State<Login> {
       Navigator.pushNamed(context, '/hosts');
     }
   }
+
   @override
   Widget build(BuildContext context) {
     DashModel dashModel = Provider.of<DashModel>(context);
@@ -73,65 +74,65 @@ class _LoginState extends State<Login> {
                     children: <Widget>[
                       Provider.of<DashModel>(context).dash.language == 0
                           ? Padding(
-                        padding: const EdgeInsets.only(right: 8.0),
-                        child: Image.asset(
-                          'assets/lv.png',
-                          width: 32,
-                          height: 32,
-                        ),
-                      )
+                              padding: const EdgeInsets.only(right: 8.0),
+                              child: Image.asset(
+                                'assets/lv.png',
+                                width: 32,
+                                height: 32,
+                              ),
+                            )
                           : Provider.of<DashModel>(context).dash.language == 2
-                          ? Padding(
-                        padding: const EdgeInsets.only(right: 8.0),
-                        child: Image.asset(
-                          'assets/ru.png',
-                          width: 32,
-                          height: 32,
-                        ),
-                      )
-                          : Padding(
-                        padding: const EdgeInsets.only(right: 8.0),
-                        child: Image.asset(
-                          'assets/en.png',
-                          width: 32,
-                          height: 32,
-                        ),
-                      ),
+                              ? Padding(
+                                  padding: const EdgeInsets.only(right: 8.0),
+                                  child: Image.asset(
+                                    'assets/ru.png',
+                                    width: 32,
+                                    height: 32,
+                                  ),
+                                )
+                              : Padding(
+                                  padding: const EdgeInsets.only(right: 8.0),
+                                  child: Image.asset(
+                                    'assets/en.png',
+                                    width: 32,
+                                    height: 32,
+                                  ),
+                                ),
                       Provider.of<DashModel>(context).dash.language == 0
                           ? Text(
-                        Provider.of<DashModel>(context)
-                            .langs
-                            .data[0]
-                            .names
-                            .lv,
-                        style: TextStyle(
-                            fontSize: 18.0,
-                            fontWeight: FontWeight.w600,
-                            color: hexToColor('#b1b1b1')),
-                      )
+                              Provider.of<DashModel>(context)
+                                  .langs
+                                  .data[0]
+                                  .names
+                                  .lv,
+                              style: TextStyle(
+                                  fontSize: 18.0,
+                                  fontWeight: FontWeight.w600,
+                                  color: hexToColor('#b1b1b1')),
+                            )
                           : Provider.of<DashModel>(context).dash.language == 2
-                          ? Text(
-                        Provider.of<DashModel>(context)
-                            .langs
-                            .data[2]
-                            .names
-                            .ru,
-                        style: TextStyle(
-                            fontSize: 18.0,
-                            fontWeight: FontWeight.w600,
-                            color: hexToColor('#b1b1b1')),
-                      )
-                          : Text(
-                        Provider.of<DashModel>(context)
-                            .langs
-                            .data[1]
-                            .names
-                            .en,
-                        style: TextStyle(
-                            fontSize: 18.0,
-                            fontWeight: FontWeight.w600,
-                            color: hexToColor('#b1b1b1')),
-                      ),
+                              ? Text(
+                                  Provider.of<DashModel>(context)
+                                      .langs
+                                      .data[2]
+                                      .names
+                                      .ru,
+                                  style: TextStyle(
+                                      fontSize: 18.0,
+                                      fontWeight: FontWeight.w600,
+                                      color: hexToColor('#b1b1b1')),
+                                )
+                              : Text(
+                                  Provider.of<DashModel>(context)
+                                      .langs
+                                      .data[1]
+                                      .names
+                                      .en,
+                                  style: TextStyle(
+                                      fontSize: 18.0,
+                                      fontWeight: FontWeight.w600,
+                                      color: hexToColor('#b1b1b1')),
+                                ),
                     ],
                   ),
                   onPressed: () => Navigator.pushNamed(context, '/languages'),
@@ -157,8 +158,8 @@ class _LoginState extends State<Login> {
                     width: 256,
                   ),
                   Padding(
-                    padding:
-                    const EdgeInsets.only(left: 16.0, right: 16.0, top: 32.0),
+                    padding: const EdgeInsets.only(
+                        left: 16.0, right: 16.0, top: 32.0),
                     child: Container(
                       height: 48.0,
                       child: TextField(
@@ -169,7 +170,10 @@ class _LoginState extends State<Login> {
                         keyboardType: TextInputType.emailAddress,
                         decoration: InputDecoration(
                           floatingLabelBehavior: FloatingLabelBehavior.never,
-                          hintText: !_focus.hasPrimaryFocus ? dashModel.getTranslation(code: 'mob_app_email_placeholder') : '',
+                          hintText: !_focus.hasPrimaryFocus
+                              ? dashModel.getTranslation(
+                                  code: 'mob_app_email_placeholder')
+                              : '',
                           focusedBorder: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(24.0),
                             borderSide: BorderSide(
@@ -177,7 +181,8 @@ class _LoginState extends State<Login> {
                           ),
                           border: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(24.0),
-                              borderSide: BorderSide(color: hexToColor('#d6dde3'))),
+                              borderSide:
+                                  BorderSide(color: hexToColor('#d6dde3'))),
                           contentPadding: EdgeInsets.zero,
                           focusColor: hexToColor('#23a0ff'),
                         ),
@@ -191,13 +196,13 @@ class _LoginState extends State<Login> {
                   ),
                   Provider.of<UserData>(context).hasError
                       ? Text(
-                    Provider.of<UserData>(context).error ?? 'Error',
-                    style: TextStyle(color: Colors.red),
-                  )
+                          Provider.of<UserData>(context).error ?? 'Error',
+                          style: TextStyle(color: Colors.red),
+                        )
                       : Offstage(),
                   Padding(
-                    padding:
-                    const EdgeInsets.only(left: 16.0, right: 16.0, top: 8.0),
+                    padding: const EdgeInsets.only(
+                        left: 16.0, right: 16.0, top: 8.0),
                     child: ButtonTheme(
                       height: 48.0,
                       minWidth: double.infinity,
@@ -207,7 +212,8 @@ class _LoginState extends State<Login> {
                       buttonColor: hexToColor('#23a0ff'),
                       child: RaisedButton(
                         child: Text(
-                          dashModel.getTranslation(code: 'mob_app_email_button'),
+                          dashModel.getTranslation(
+                              code: 'mob_app_email_button'),
                           style: TextStyle(
                               color: Colors.white,
                               fontSize: 18.0,
@@ -225,7 +231,9 @@ class _LoginState extends State<Login> {
       );
     }
     return Scaffold(
-      body: Center(child: CircularProgressIndicator(),),
+      body: Center(
+        child: CircularProgressIndicator(),
+      ),
     );
   }
 }
