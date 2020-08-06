@@ -628,64 +628,137 @@ class _SliverMetersState extends State<SliverMeters>
                 ),
               ),
               SliverToBoxAdapter(
-                child: Container(
-                  margin: EdgeInsets.only(
-                      left: 8.0, right: 8.0, top: 16.0, bottom: 8.0),
-                  width: double.infinity,
-                  height: 40,
-                  decoration: BoxDecoration(
-                      borderRadius: BorderRadius.all(Radius.circular(10)),
-                      color: Colors.white,
-                      boxShadow: [
-                        BoxShadow(
-                            offset: Offset(0.0, 2.0),
-                            blurRadius: 1.0,
-                            spreadRadius: -1.0,
-                            color: _kKeyUmbraOpacity),
-                        BoxShadow(
-                            offset: Offset(0.0, 1.0),
-                            blurRadius: 1.0,
-                            spreadRadius: 0.0,
-                            color: _kKeyPenumbraOpacity),
-                        BoxShadow(
-                            offset: Offset(0.0, 1.0),
-                            blurRadius: 3.0,
-                            spreadRadius: 0.0,
-                            color: _kAmbientShadowOpacity),
-                      ]),
-                  child: Stack(
-                    alignment: Alignment.center,
-                    children: <Widget>[
-                      Positioned(
-                        left: 16.0,
-                        child: Text(
-                          dashState.getTranslation(code: 'mob_app_type_input'),
-                          style: TextStyle(fontSize: 16.0),
+                child: GestureDetector(
+                  onTap: () {
+                    showDialog(
+                        context: context,
+                        builder: (BuildContext context) {
+                          return AlertDialog(
+                            contentPadding: EdgeInsets.zero,
+                            content: Container(
+                              width: double.maxFinite,
+                              child: Column(
+                                mainAxisSize: MainAxisSize.min,
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: <Widget>[
+                                  Padding(
+                                    padding: const EdgeInsets.only(
+                                        top: 24.0, left: 16.0),
+                                    child: Text(
+                                      dashState.getTranslation(
+                                          code: 'mob_app_accounts_title'),
+                                      style: TextStyle(
+                                          fontSize: 22,
+                                          fontWeight: FontWeight.w600),
+                                      textAlign: TextAlign.left,
+                                    ),
+                                  ),
+                                  Padding(
+                                    padding: const EdgeInsets.only(
+                                        left: 16.0,
+                                        right: 16.0,
+                                        top: 8.0,
+                                        bottom: 24.0),
+                                    child: ButtonTheme(
+                                      height: 40.0,
+                                      minWidth: double.infinity,
+                                      shape: RoundedRectangleBorder(
+                                        borderRadius:
+                                            BorderRadius.circular(24.0),
+                                      ),
+                                      buttonColor: hexToColor('#e5edf3'),
+                                      child: RaisedButton(
+                                        elevation: 0,
+                                        child: Text(
+                                          dashState.getTranslation(
+                                              code: 'mob_app_close'),
+                                          style: TextStyle(
+                                              color: hexToColor('#3e4a5e'),
+                                              fontSize: 18.0,
+                                              fontWeight: FontWeight.w600),
+                                        ),
+                                        onPressed: () async {
+                                          Navigator.pop(context);
+                                        },
+                                        // onPressed: _isButtonDisabled ? null : _updateEmail,
+                                      ),
+                                    ),
+                                  )
+                                ],
+                              ),
+                            ),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(10),
+                            ),
+                          );
+                        });
+                  },
+                  child: Container(
+                    margin: EdgeInsets.only(
+                        left: 8.0, right: 8.0, top: 16.0, bottom: 8.0),
+                    width: double.infinity,
+                    height: 40,
+                    decoration: BoxDecoration(
+                        borderRadius: BorderRadius.all(Radius.circular(10)),
+                        color: Colors.white,
+                        boxShadow: [
+                          BoxShadow(
+                              offset: Offset(0.0, 2.0),
+                              blurRadius: 1.0,
+                              spreadRadius: -1.0,
+                              color: _kKeyUmbraOpacity),
+                          BoxShadow(
+                              offset: Offset(0.0, 1.0),
+                              blurRadius: 1.0,
+                              spreadRadius: 0.0,
+                              color: _kKeyPenumbraOpacity),
+                          BoxShadow(
+                              offset: Offset(0.0, 1.0),
+                              blurRadius: 3.0,
+                              spreadRadius: 0.0,
+                              color: _kAmbientShadowOpacity),
+                        ]),
+                    child: Stack(
+                      alignment: Alignment.center,
+                      children: <Widget>[
+                        Positioned(
+                          left: 16.0,
+                          child: Text(
+                            dashState.getTranslation(
+                                code: 'mob_app_type_input'),
+                            style: TextStyle(fontSize: 16.0),
+                          ),
                         ),
-                      ),
-                      Positioned(
-                        right: 8.0,
-                        child: Icon(Icons.arrow_drop_down),
-                      )
-                    ],
+                        Positioned(
+                          right: 8.0,
+                          child: Icon(Icons.arrow_drop_down),
+                        )
+                      ],
+                    ),
                   ),
                 ),
               ),
               SliverList(
                 delegate: SliverChildBuilderDelegate((context, int index) {
                   DateFormat format = new DateFormat("d.m.y");
-                  Color dateColor = dashState.meters.data[index].nextCheck != "" ?
-                      format.parse(dashState.meters.data[index].nextCheck)
+                  Color dateColor = dashState.meters.data[index].nextCheck != ""
+                      ? format
+                                  .parse(dashState.meters.data[index].nextCheck)
                                   .compareTo(DateTime.now()) <
                               0
                           ? Colors.red
-                          : hexToColor("#222e42") : hexToColor("#222e42");
-                  Color dateLabelColor = dashState.meters.data[index].nextCheck != "" ?
-                  format.parse(dashState.meters.data[index].nextCheck)
-                      .compareTo(DateTime.now()) <
-                      0
-                      ? Colors.red
-                      : hexToColor("#8d96a4") : hexToColor("#8d96a4");
+                          : hexToColor("#222e42")
+                      : hexToColor("#222e42");
+                  Color dateLabelColor = dashState
+                              .meters.data[index].nextCheck !=
+                          ""
+                      ? format
+                                  .parse(dashState.meters.data[index].nextCheck)
+                                  .compareTo(DateTime.now()) <
+                              0
+                          ? Colors.red
+                          : hexToColor("#8d96a4")
+                      : hexToColor("#8d96a4");
                   return Container(
                     decoration: BoxDecoration(
                         borderRadius: BorderRadius.all(Radius.circular(10)),
@@ -773,8 +846,7 @@ class _SliverMetersState extends State<SliverMeters>
                                 dashState.getTranslation(
                                     code: 'mob_app_expire'),
                                 style: TextStyle(
-                                    color: dateLabelColor,
-                                    fontSize: 16.0),
+                                    color: dateLabelColor, fontSize: 16.0),
                               ),
                               Text(
                                 Provider.of<DashModel>(context)

@@ -1,8 +1,11 @@
+import 'dart:ui';
+
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:webnams_app_v3/src/models/dashboard/dashboard_model.dart';
 import 'package:webnams_app_v3/src/models/user/user_model.dart';
 import 'package:webnams_app_v3/src/resources/colors.dart';
+import 'package:supercharged/supercharged.dart';
 
 class Password extends StatefulWidget {
   const Password({Key key}) : super(key: key);
@@ -45,7 +48,7 @@ class _PasswordState extends State<Password> {
       });
       await Provider.of<UserData>(context, listen: false)
           .updatePassword(password);
-      await dashState.getUser();
+      await dashState.newGetUser();
       if (dashState.hasError) {
         showDialog(context: context, builder: (context) {
           return AlertDialog(
@@ -178,7 +181,16 @@ class _PasswordState extends State<Password> {
                   // onPressed: _isButtonDisabled ? null : _updateEmail,
                 ),
               ),
-            )
+            ),
+//            GestureDetector(
+//              onTap: () {
+//
+//              },
+//              child: Padding(
+//                padding: const EdgeInsets.all(8.0),
+//                child: Center(child: Text("Aizmirsi paroli?", style: TextStyle(fontSize: 16.0, fontWeight: FontWeight.w600, color: "#23a0ff".toColor()),)),
+//              ),
+//            )
           ],
         ),
       );

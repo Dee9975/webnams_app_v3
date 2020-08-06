@@ -7,5 +7,5 @@ class Dash {
   int language;
   String token;
 
-  Dash(this.selectedIndex, this.language, this.token);
+  Dash({this.selectedIndex = 0, this.language = 0, this.token = ""});
 }

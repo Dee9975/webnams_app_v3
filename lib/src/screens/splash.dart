@@ -16,7 +16,10 @@ class _SplashState extends State<Splash> {
   bool loading = false;
   bool retry = false;
   Widget body = Center(
-    child: Container(child: Image.asset('assets/logo.png'), margin: EdgeInsets.only(left: 24, right: 24),),
+    child: Container(
+      child: Image.asset('assets/logo.png'),
+      margin: EdgeInsets.only(left: 24, right: 24),
+    ),
   );
   SplashState state = SplashState.loading;
   SplashState loggedInState;
@@ -52,13 +55,20 @@ class _SplashState extends State<Splash> {
   Future<bool> getData([retry = false]) async {
     try {
       SharedPreferences prefs = await SharedPreferences.getInstance();
-      await Provider.of<DashModel>(context, listen: false).getLanguages();
-      await Provider.of<DashModel>(context, listen: false).getTranslations();
       Locale locale = Localizations.localeOf(context);
       if (!prefs.containsKey('language')) {
-        prefs.setInt('language', locale.languageCode == 'lv' ? 0 : locale.languageCode == 'en' ? 1 : locale.languageCode == 'ru' ? 2 : 0);
-        Provider.of<DashModel>(context, listen: false).updateSelectedLanguage(prefs.getInt('language'));
+        prefs.setInt(
+            'language',
+            locale.languageCode == 'lv'
+                ? 0
+                : locale.languageCode == 'en'
+                    ? 1
+                    : locale.languageCode == 'ru' ? 2 : 0);
+        Provider.of<DashModel>(context, listen: false)
+            .updateSelectedLanguage(prefs.getInt('language'));
       }
+      await Provider.of<DashModel>(context, listen: false).getLanguages();
+      await Provider.of<DashModel>(context, listen: false).getTranslations();
       if (retry) {
         if (prefs.containsKey('userExists') && prefs.getBool('userExists')) {
           setState(() {
@@ -81,7 +91,8 @@ class _SplashState extends State<Splash> {
         state = SplashState.noNet;
       });
       return false;
-    } catch (e) {
+    } catch (e, stack) {
+      print(stack);
       setState(() {
         state = SplashState.timeout;
       });
@@ -93,14 +104,16 @@ class _SplashState extends State<Splash> {
     if (state == SplashState.loading) {
       setState(() {
         body = Center(
-          child: Container(child: Image.asset('assets/logo.png'), margin: EdgeInsets.only(left: 24, right: 24),),
+          child: Container(
+            child: Image.asset('assets/logo.png'),
+            margin: EdgeInsets.only(left: 24, right: 24),
+          ),
         );
       });
     }
     if (state == SplashState.noNet) {
       Map<String, String> modalTranslations = hardcodedTranslation(
-          Provider.of<DashModel>(context).dash.language ?? 0,
-          "internet_loss");
+          Provider.of<DashModel>(context).dash.language ?? 0, "internet_loss");
       setState(() {
         body = Center(
           child: Padding(
@@ -111,9 +124,7 @@ class _SplashState extends State<Splash> {
                 Padding(
                   padding: const EdgeInsets.only(bottom: 52.0),
                   child: Container(
-                    width: 170,
-                    child: Image.asset("assets/network.png")
-                  ),
+                      width: 170, child: Image.asset("assets/network.png")),
                 ),
                 Text(
                   modalTranslations["title"],
@@ -137,8 +148,7 @@ class _SplashState extends State<Splash> {
     }
     if (state == SplashState.timeout) {
       Map<String, String> modalTranslations = hardcodedTranslation(
-          Provider.of<DashModel>(context).dash.language ?? 0,
-          "timeout");
+          Provider.of<DashModel>(context).dash.language ?? 0, "timeout");
       setState(() {
         body = Center(
           child: Padding(
@@ -146,7 +156,10 @@ class _SplashState extends State<Splash> {
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Image.asset("assets/network.png"),
+                Padding(
+                  padding: const EdgeInsets.only(bottom: 52.0),
+                  child: Container(width: 170, child: Image.asset("assets/network.png")),
+                ),
                 Text(
                   modalTranslations["title"],
                   textAlign: TextAlign.center,
@@ -165,16 +178,8 @@ class _SplashState extends State<Splash> {
         );
       });
     }
-    return Scaffold(
-      body: body
-    );
+    return Scaffold(body: body);
   }
 }
 
-enum SplashState {
-  loggedIn,
-  notLoggedIn,
-  timeout,
-  noNet,
-  loading
-}
+enum SplashState { loggedIn, notLoggedIn, timeout, noNet, loading }

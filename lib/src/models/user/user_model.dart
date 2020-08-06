@@ -10,9 +10,10 @@ import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:webnams_app_v3/src/resources/networking.dart';
+import 'package:supercharged/supercharged.dart';
 
 class UserData extends ChangeNotifier {
-  User user = User('', '', '', null, '', '');
+  User user = User();
 
   String _url = kReleaseMode
       ? 'https://webapi.webnams.lv'
@@ -22,6 +23,8 @@ class UserData extends ChangeNotifier {
   String _error = '';
   bool _hasError = false;
   HostModel _hosts;
+  String _qrError = "";
+  bool _hasQrError = false;
 
   final client = http.Client();
   NetworkProvider networkProvider;
@@ -35,6 +38,9 @@ class UserData extends ChangeNotifier {
   bool get hasError => _hasError;
   String get getResponseText => _jsonResponse;
   HostModel get hosts => _hosts;
+  String get qrError => _qrError;
+  bool get hasQrError => _hasQrError;
+
 
   Future<void> updateEmail(String email) async {
     user.email = email;
@@ -158,10 +164,9 @@ class UserData extends ChangeNotifier {
         prefs.setString('refresh_token', login.data.refreshToken);
         prefs.setString(
             'expires', DateTime.now().add(new Duration(hours: 1)).toString());
-        prefs.setInt('user_id', login.data.userId);
-        prefs.setInt('host_id', user.host);
         prefs.setString('username', user.email);
         prefs.setString('password', user.password);
+        prefs.setBool("loginWithPassword", true);
         prefs.setBool('userExists', true);
         _hasError = false;
         notifyListeners();
@@ -207,5 +212,52 @@ class UserData extends ChangeNotifier {
       return data['data'];
     }
     return null;
+  }
+
+  Future<bool> loginBarcode(String hash) async {
+    String username = 'WebNAMS_APP';
+    String password = 'zF##u#^\$kaehxzkuG+F&u3*b8aDJGK#-Ra@d2JPC';
+    String basicAuth =
+        'Basic ' + base64Encode(utf8.encode('$username:$password'));
+    try {
+      _isFetching = true;
+      notifyListeners();
+      SharedPreferences prefs = await SharedPreferences.getInstance();
+      http.Response response = await networkProvider.post(uri: "/qr-data", headers: {
+        'authorization': basicAuth,
+      }, body: {
+        "grant_type": "password",
+        "qr": hash,
+        "language": prefs.getInt("language") == 0
+            ? "lv"
+            : prefs.getInt("language") == 1 ? "en" : "ru"
+      });
+      if (response.statusCode == 200) {
+        Login login = Login.fromJson(response.body.parseJSON());
+        prefs.setString('token', login.data.accessToken);
+        prefs.setString('refresh_token', login.data.refreshToken);
+        prefs.setString(
+            'expires', DateTime.now().add(new Duration(hours: 1)).toString());
+        prefs.setBool('userExists', true);
+        prefs.setBool("loginWithBarcode", true);
+        _hasQrError = false;
+        notifyListeners();
+        _qrError = "";
+        notifyListeners();
+        return true;
+      } else {
+        _hasQrError = true;
+        notifyListeners();
+        _qrError = json.decode(response.body)["error"]?? "Error";
+        notifyListeners();
+        return false;
+      }
+    } catch (e) {
+      return false;
+    } finally {
+      _isFetching = false;
+      notifyListeners();
+    }
+
   }
 }

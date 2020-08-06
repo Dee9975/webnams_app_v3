@@ -29,8 +29,8 @@ import 'package:webnams_app_v3/src/resources/translations.dart';
 import 'dash_box.dart';
 
 class DashModel extends ChangeNotifier {
-  Dash dash = Dash(0, 0, '');
-  User user = User('', '', '', null, '', '');
+  Dash dash = Dash();
+  User user = User();
   final String _url = kReleaseMode ? 'https://webapi.webnams.lv' : 'https://dev.webapi.webnams.lv';
   final http.Client client = http.Client();
   NetworkProvider networkProvider;
@@ -92,7 +92,7 @@ class DashModel extends ChangeNotifier {
 
   DashModel() {
     networkProvider = new NetworkProvider(client: client, baseUrl: _url);
-    getUser();
+    newGetUser();
   }
 
   void getFlashText(bool status) {
@@ -265,14 +265,68 @@ class DashModel extends ChangeNotifier {
     }
   }
 
+  Future<void> newGetUser() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    bool withBarcode = prefs.containsKey("loginWithBarcode") ? prefs.getBool("loginWithBarcode") : false;
+    bool withPassword = prefs.containsKey("loginWithPassword") ? prefs.getBool("loginWithPassword") : false;
+    bool hasEmail = prefs.containsKey("username");
+
+    dash.language = prefs.getInt("language");
+    notifyListeners();
+
+    try {
+      _isLoading = true;
+      notifyListeners();
+      user = User();
+      await getLanguages();
+      await getTranslations();
+
+      await getToken();
+      await getAddresses();
+      await getMeters();
+      await getBills();
+      await getDashBox();
+      await getAnnouncements();
+      getFlashText(false);
+      notifyListeners();
+      _hasError = false;
+      notifyListeners();
+      _error = "";
+      notifyListeners();
+    }  on NoInternetException catch (_) {
+      _isLoading = false;
+      notifyListeners();
+      _errorType = "internet_loss";
+      notifyListeners();
+      _hasError = true;
+      notifyListeners();
+      _error = hardcodedTranslation(dash.language, "internet_loss")["subtitle"];
+    } on TimeoutException catch (_) {
+      _isLoading = false;
+      notifyListeners();
+      _errorType = "timeout";
+      notifyListeners();
+      _hasError = true;
+      notifyListeners();
+      _error = hardcodedTranslation(dash.language, "timeout")["subtitle"];
+    } catch (e, stacktrace) {
+      print(stacktrace);
+    } finally {
+      _isLoading = false;
+      notifyListeners();
+    }
+  }
+
   Future<void> getUser() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     var userData = prefs.getString('username');
+    bool barcode = prefs.containsKey("loginWithBarcode") ? prefs.getBool("loginWithBarcode") : false;
+
     if (userData == null) {
       _isLoading = true;
       notifyListeners();
       try {
-        user = User('', '', '', null, null, '');
+        user = User();
         await getLanguages();
         notifyListeners();
         await getTranslations();
@@ -299,8 +353,8 @@ class DashModel extends ChangeNotifier {
         notifyListeners();
       }
     } else {
-      user = User(prefs.getString('username'), prefs.getString('password'), '',
-          prefs.getInt('host_id'), '', prefs.getString('token'));
+      user = User(email: prefs.getString('username'), password: prefs.getString('password'),
+          host: prefs.getInt('host_id'), hostName: '', token: prefs.getString('token'));
     }
     dash.language = prefs.getInt('language');
     _isLoading = true;
@@ -670,6 +724,7 @@ class DashModel extends ChangeNotifier {
   }
 
   Future<void> getTranslations() async {
+    print(dash.language);
     http.Response response = await networkProvider.post(
         uri: '/translations/${_langs.data[dash.language].code.toLowerCase()}');
     if (response.statusCode == 200) {

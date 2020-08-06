@@ -1,6 +1,8 @@
 import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
 import 'package:webnams_app_v3/src/app.dart';
+import 'package:supercharged/supercharged.dart';
+
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();

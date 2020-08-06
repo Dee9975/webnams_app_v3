@@ -7,6 +7,7 @@ import 'package:webnams_app_v3/src/resources/translations.dart';
 import 'package:webnams_app_v3/src/widgets/announcements_box.dart';
 import 'package:webnams_app_v3/src/widgets/meters_box.dart';
 import 'package:webnams_app_v3/src/widgets/payment_warning.dart';
+import 'package:supercharged/supercharged.dart';
 
 const Color _kKeyUmbraOpacity = Color(0x33000000); // alpha = 0.2
 const Color _kKeyPenumbraOpacity = Color(0x24000000); // alpha = 0.14

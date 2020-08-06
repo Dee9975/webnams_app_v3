@@ -63,7 +63,7 @@ class Data {
     data['token_type'] = this.tokenType;
     data['scope'] = this.scope;
     data['refresh_token'] = this.refreshToken;
-    data['user_id'] = this.userId;
+    data['user_id'] = this.userId?? 0;
     data['language'] = this.language;
     return data;
   }

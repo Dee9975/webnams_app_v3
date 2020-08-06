@@ -23,7 +23,7 @@
 	<key>LSRequiresIPhoneOS</key>
 	<true/>
 	<key>NSCameraUsageDescription</key>
-	<string>The camera is used to take a picture of the meter to then compare with the reading input</string>
+	<string>The camera is used to take a picture of the meter to then compare with the reading input and scan a barcode for a faster login</string>
 	<key>UILaunchStoryboardName</key>
 	<string>LaunchScreen</string>
 	<key>UIMainStoryboardFile</key>

@@ -6,12 +6,11 @@ class User {
   String hostName;
   String token;
 
-  User(
-    this.email,
-    this.password,
-    this.clientSecret,
-    this.host,
-    this.hostName,
-    this.token,
-  );
+  User({
+    this.email = "",
+    this.password = "",
+    this.host = 0,
+    this.hostName = "",
+    this.token = "",
+  });
 }
