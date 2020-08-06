@@ -232,7 +232,7 @@ class _LoginState extends State<Login> {
                                                 }
                                               }
                                             },
-                                            child: Text("Skenēt"),
+                                            child: Text(Provider.of<DashModel>(context, listen: false).getTranslation(code: "mob_app_qr_scan")),
                                           ),
                                         ],
                                       );
