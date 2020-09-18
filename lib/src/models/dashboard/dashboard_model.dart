@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
@@ -15,9 +17,11 @@ import 'package:webnams_app_v3/src/models/dashboard/dashboard.dart';
 import 'package:webnams_app_v3/src/models/image_model.dart';
 import 'package:webnams_app_v3/src/models/language/language_model.dart';
 import 'package:webnams_app_v3/src/models/language/translation_model.dart';
+import 'package:webnams_app_v3/src/models/meter_history_data.dart';
 import 'package:webnams_app_v3/src/models/meters/data.dart';
 import 'package:http/http.dart' as http;
 import 'package:webnams_app_v3/src/models/meters/meters.dart';
+import 'package:supercharged/supercharged.dart';
 import 'dart:convert';
 import 'dart:io';
 
@@ -31,7 +35,9 @@ import 'dash_box.dart';
 class DashModel extends ChangeNotifier {
   Dash dash = Dash();
   User user = User();
-  final String _url = kReleaseMode ? 'https://webapi.webnams.lv' : 'https://dev.webapi.webnams.lv';
+  final String _url = kReleaseMode
+      ? 'https://webapi.webnams.lv'
+      : 'https://dev.webapi.webnams.lv';
   final http.Client client = http.Client();
   NetworkProvider networkProvider;
   String _error = '';
@@ -62,7 +68,11 @@ class DashModel extends ChangeNotifier {
   ImageModel _selectedImage;
   String _errorType;
   String _success;
+  MeterHistoryData _history;
+  int _selectedIndex = 0;
 
+  int get selectedIndex => _selectedIndex;
+  MeterHistoryData get history => _history;
   String get success => _success;
   String get errorType => _errorType;
   String get error => _error;
@@ -89,6 +99,21 @@ class DashModel extends ChangeNotifier {
   AnnouncementData get selectedAnnouncement => _selectedAnnouncement;
   String get meterSendText => _meterSendText;
   ImageModel get selectedImage => _selectedImage;
+
+  set selectedIndex(int index) {
+    _selectedIndex = index;
+    notifyListeners();
+  }
+
+  set hasError(bool error) {
+    _hasError = error;
+    notifyListeners();
+  }
+
+  set error(String error) {
+    _error = error;
+    notifyListeners();
+  }
 
   DashModel() {
     networkProvider = new NetworkProvider(client: client, baseUrl: _url);
@@ -127,6 +152,7 @@ class DashModel extends ChangeNotifier {
   }
 
   void updateSelectedIndex(int index) {
+    print("Here");
     dash.selectedIndex = index;
     notifyListeners();
   }
@@ -205,7 +231,8 @@ class DashModel extends ChangeNotifier {
   Future<void> getAddresses({bool refresh = false}) async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     await getToken();
-    http.Response response = await networkProvider.post(uri: "/addresses", body: {
+    http.Response response =
+        await networkProvider.post(uri: "/addresses", body: {
       "access_token": dash.token,
     });
 //    http.Response response = await client.post('$_url/addresses', body: {
@@ -220,12 +247,12 @@ class DashModel extends ChangeNotifier {
     } else if (response.statusCode == 999) {
       _hasError = true;
       notifyListeners();
-      _error = json.decode(response.body)["error"]?? "No internet";
+      _error = json.decode(response.body)["error"] ?? "No internet";
       notifyListeners();
     } else if (response.statusCode == 408) {
       _hasError = true;
       notifyListeners();
-      _error = json.decode(response.body)["error"]?? "Timed out";
+      _error = json.decode(response.body)["error"] ?? "Timed out";
       notifyListeners();
     }
   }
@@ -267,9 +294,6 @@ class DashModel extends ChangeNotifier {
 
   Future<void> newGetUser() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
-    bool withBarcode = prefs.containsKey("loginWithBarcode") ? prefs.getBool("loginWithBarcode") : false;
-    bool withPassword = prefs.containsKey("loginWithPassword") ? prefs.getBool("loginWithPassword") : false;
-    bool hasEmail = prefs.containsKey("username");
 
     dash.language = prefs.getInt("language");
     notifyListeners();
@@ -293,7 +317,7 @@ class DashModel extends ChangeNotifier {
       notifyListeners();
       _error = "";
       notifyListeners();
-    }  on NoInternetException catch (_) {
+    } on NoInternetException catch (_) {
       _isLoading = false;
       notifyListeners();
       _errorType = "internet_loss";
@@ -320,7 +344,9 @@ class DashModel extends ChangeNotifier {
   Future<void> getUser() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     var userData = prefs.getString('username');
-    bool barcode = prefs.containsKey("loginWithBarcode") ? prefs.getBool("loginWithBarcode") : false;
+    bool barcode = prefs.containsKey("loginWithBarcode")
+        ? prefs.getBool("loginWithBarcode")
+        : false;
 
     if (userData == null) {
       _isLoading = true;
@@ -339,7 +365,8 @@ class DashModel extends ChangeNotifier {
         notifyListeners();
         _hasError = true;
         notifyListeners();
-        _error = hardcodedTranslation(dash.language, "internet_loss")["subtitle"];
+        _error =
+            hardcodedTranslation(dash.language, "internet_loss")["subtitle"];
       } on TimeoutException catch (_) {
         _isLoading = false;
         notifyListeners();
@@ -353,8 +380,12 @@ class DashModel extends ChangeNotifier {
         notifyListeners();
       }
     } else {
-      user = User(email: prefs.getString('username'), password: prefs.getString('password'),
-          host: prefs.getInt('host_id'), hostName: '', token: prefs.getString('token'));
+      user = User(
+          email: prefs.getString('username'),
+          password: prefs.getString('password'),
+          host: prefs.getInt('host_id'),
+          hostName: '',
+          token: prefs.getString('token'));
     }
     dash.language = prefs.getInt('language');
     _isLoading = true;
@@ -372,7 +403,8 @@ class DashModel extends ChangeNotifier {
         notifyListeners();
         _hasError = true;
         notifyListeners();
-        _error = hardcodedTranslation(dash.language, "internet_loss")["subtitle"];
+        _error =
+            hardcodedTranslation(dash.language, "internet_loss")["subtitle"];
       } on TimeoutException catch (_) {
         _isLoading = false;
         notifyListeners();
@@ -385,7 +417,6 @@ class DashModel extends ChangeNotifier {
         _isLoading = false;
         notifyListeners();
       }
-
     }
     try {
       await getToken();
@@ -400,7 +431,7 @@ class DashModel extends ChangeNotifier {
       notifyListeners();
       _error = "";
       notifyListeners();
-    } on NoInternetException catch(e) {
+    } on NoInternetException catch (e) {
       _isLoading = false;
       notifyListeners();
       _errorType = "internet_loss";
@@ -409,7 +440,7 @@ class DashModel extends ChangeNotifier {
       notifyListeners();
       _error = hardcodedTranslation(dash.language, "internet_loss")["subtitle"];
       notifyListeners();
-    } on TimeoutException catch(e) {
+    } on TimeoutException catch (e) {
       _isLoading = false;
       notifyListeners();
       _errorType = "internet_loss";
@@ -453,9 +484,7 @@ class DashModel extends ChangeNotifier {
       notifyListeners();
       _error = hardcodedTranslation(dash.language, _errorType)["subtitle"];
       notifyListeners();
-      print(e);
     }
-
   }
 
   Future<void> refreshMeters() async {
@@ -512,7 +541,8 @@ class DashModel extends ChangeNotifier {
     String password = 'zF##u#^\$kaehxzkuG+F&u3*b8aDJGK#-Ra@d2JPC';
     String basicAuth =
         'Basic ' + base64Encode(utf8.encode('$username:$password'));
-    http.Response response = await networkProvider.post(uri: "/token", headers: {
+    http.Response response =
+        await networkProvider.post(uri: "/token", headers: {
       'authorization': basicAuth
     }, body: {
       'refresh_token': prefs.getString('refresh_token'),
@@ -536,12 +566,12 @@ class DashModel extends ChangeNotifier {
     } else if (response.statusCode == 999) {
       _hasError = true;
       notifyListeners();
-      _error = json.decode(response.body)["error"]?? "No internet";
+      _error = json.decode(response.body)["error"] ?? "No internet";
       notifyListeners();
     } else if (response.statusCode == 408) {
       _hasError = true;
       notifyListeners();
-      _error = json.decode(response.body)["error"]?? "Timed out";
+      _error = json.decode(response.body)["error"] ?? "Timed out";
       notifyListeners();
     } else {
       TokenError errorData = TokenError.fromJson(json.decode(response.body));
@@ -552,23 +582,25 @@ class DashModel extends ChangeNotifier {
   Future<void> getMeters() async {
     try {
       await getToken();
-      http.Response response =
-      await networkProvider.post(uri: '/meters/${_selectedAddress.id}', body: {
+      http.Response response = await networkProvider
+          .post(uri: '/meters/${_selectedAddress.id}', body: {
         'access_token': dash.token,
         'language': _langs.data[dash.language].code.toLowerCase()
       });
       if (response.statusCode == 200) {
         _meters = Meters.fromJson(json.decode(response.body));
+        _hasError = false;
+        _error = "";
         notifyListeners();
       } else if (response.statusCode == 999) {
         _hasError = true;
         notifyListeners();
-        _error = json.decode(response.body)["error"]?? "No internet";
+        _error = json.decode(response.body)["error"] ?? "No internet";
         notifyListeners();
       } else if (response.statusCode == 408) {
         _hasError = true;
         notifyListeners();
-        _error = json.decode(response.body)["error"]?? "Timed out";
+        _error = json.decode(response.body)["error"] ?? "Timed out";
         notifyListeners();
       } else {
         throw Exception('Failed to get meters');
@@ -586,8 +618,7 @@ class DashModel extends ChangeNotifier {
     } catch (e) {
       _hasError = true;
       notifyListeners();
-      _error = "hee meters";
-//      _error = e.toString();
+      _error = e.toString();
       notifyListeners();
     }
   }
@@ -603,35 +634,35 @@ class DashModel extends ChangeNotifier {
           'access_token': dash.token
         },
       );
+
       if (response.statusCode == 200) {
         _bills = Bills.fromJson(json.decode(response.body));
         notifyListeners();
       } else if (response.statusCode == 999) {
         _hasError = true;
         notifyListeners();
-        _error = json.decode(response.body)["error"]?? "No internet";
+        _error = json.decode(response.body)["error"] ?? "No internet";
         notifyListeners();
       } else if (response.statusCode == 408) {
         _hasError = true;
         notifyListeners();
-        _error = json.decode(response.body)["error"]?? "Timed out";
+        _error = json.decode(response.body)["error"] ?? "Timed out";
         notifyListeners();
       } else {
         throw Exception('Failed to get bills');
       }
-    } on TimeoutException catch (_) {
-
-    } on FormatException catch (e) {
+    } on TimeoutException catch (_) {} on FormatException catch (e) {
       print(e);
     } catch (e) {
-      print(e);
+      print("This is the error $e");
     }
   }
 
   Future<void> getDashBox() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
     await getToken();
-    http.Response response =
-        await networkProvider.post(uri: '/dashboard/${_selectedAddress.id}', body: {
+    http.Response response = await networkProvider
+        .post(uri: '/dashboard/${_selectedAddress.id}', body: {
       'id': '${_selectedAddress.id}',
       'language': _langs.data[dash.language].code.toLowerCase(),
       'access_token': dash.token
@@ -639,15 +670,16 @@ class DashModel extends ChangeNotifier {
     if (response.statusCode == 200) {
       _dashBoardBox = DashBoardBox.fromJson(json.decode(response.body));
       notifyListeners();
+      await prefs.setString("refresh-date", _dashBoardBox.data.autoRefresh.unit == "seconds" ? DateTime.now().add(_dashBoardBox.data.autoRefresh.value.seconds).toString() : DateTime.now().add(1.hours).toString());
     } else if (response.statusCode == 999) {
       _hasError = true;
       notifyListeners();
-      _error = json.decode(response.body)["error"]?? "No internet";
+      _error = json.decode(response.body)["error"] ?? "No internet";
       notifyListeners();
     } else if (response.statusCode == 408) {
       _hasError = true;
       notifyListeners();
-      _error = json.decode(response.body)["error"]?? "Timed out";
+      _error = json.decode(response.body)["error"] ?? "Timed out";
       notifyListeners();
     } else {
       throw Exception('Failed to get dashboard');
@@ -656,9 +688,11 @@ class DashModel extends ChangeNotifier {
 
   Future<bool> sendReading(var reading) async {
     await getToken();
-    http.Response response = await networkProvider.post(
-        uri: '/meters-reading/${_selectedMeter.id}/$reading',
-        body: { 'access_token': dash.token, "language": _langs.data[dash.language].code.toLowerCase()});
+    http.Response response = await networkProvider
+        .post(uri: '/meters-reading/${_selectedMeter.id}/$reading', body: {
+      'access_token': dash.token,
+      "language": _langs.data[dash.language].code.toLowerCase()
+    });
     if (response.statusCode == 200) {
       if (json.decode(response.body)['data']['success'] != null &&
           json.decode(response.body)['data']['success'] == true) {
@@ -669,13 +703,13 @@ class DashModel extends ChangeNotifier {
     } else if (response.statusCode == 999) {
       _hasError = true;
       notifyListeners();
-      _error = json.decode(response.body)["error"]?? "No internet";
+      _error = json.decode(response.body)["error"] ?? "No internet";
       notifyListeners();
       return false;
     } else if (response.statusCode == 408) {
       _hasError = true;
       notifyListeners();
-      _error = json.decode(response.body)["error"]?? "Timed out";
+      _error = json.decode(response.body)["error"] ?? "Timed out";
       notifyListeners();
       return false;
     }
@@ -718,13 +752,12 @@ class DashModel extends ChangeNotifier {
       } else {
         throw Exception(response.body);
       }
-    } on NoInternetException catch(_) {
+    } on NoInternetException catch (_) {
       throw NoInternetException();
     }
   }
 
   Future<void> getTranslations() async {
-    print(dash.language);
     http.Response response = await networkProvider.post(
         uri: '/translations/${_langs.data[dash.language].code.toLowerCase()}');
     if (response.statusCode == 200) {
@@ -733,12 +766,12 @@ class DashModel extends ChangeNotifier {
     } else if (response.statusCode == 999) {
       _hasError = true;
       notifyListeners();
-      _error = json.decode(response.body)["error"]?? "No internet";
+      _error = json.decode(response.body)["error"] ?? "No internet";
       notifyListeners();
     } else if (response.statusCode == 408) {
       _hasError = true;
       notifyListeners();
-      _error = json.decode(response.body)["error"]?? "Timed out";
+      _error = json.decode(response.body)["error"] ?? "Timed out";
       notifyListeners();
     } else {
       throw Exception('Failed to get translations');
@@ -748,7 +781,8 @@ class DashModel extends ChangeNotifier {
   Future<void> getAnnouncements() async {
     try {
       await getToken();
-      http.Response response = await networkProvider.post(uri: '/announcements', body: {
+      http.Response response =
+          await networkProvider.post(uri: '/announcements', body: {
         'adr_id': '${_selectedAddress.id}',
         'access_token': dash.token,
         'language': _langs.data[dash.language].code.toLowerCase(),
@@ -759,20 +793,19 @@ class DashModel extends ChangeNotifier {
       } else if (response.statusCode == 999) {
         _hasError = true;
         notifyListeners();
-        _error = json.decode(response.body)["error"]?? "No internet";
+        _error = json.decode(response.body)["error"] ?? "No internet";
         notifyListeners();
       } else if (response.statusCode == 408) {
         _hasError = true;
         notifyListeners();
-        _error = json.decode(response.body)["error"]?? "Timed out";
+        _error = json.decode(response.body)["error"] ?? "Timed out";
         notifyListeners();
       } else {
         throw Exception('Failed retrieving announcements');
       }
     } catch (e) {
-      print (e);
+      print(e);
     }
-
   }
 
   Future<void> readAnnouncement() async {
@@ -791,12 +824,12 @@ class DashModel extends ChangeNotifier {
     } else if (response.statusCode == 999) {
       _hasError = true;
       notifyListeners();
-      _error = json.decode(response.body)["error"]?? "No internet";
+      _error = json.decode(response.body)["error"] ?? "No internet";
       notifyListeners();
     } else if (response.statusCode == 408) {
       _hasError = true;
       notifyListeners();
-      _error = json.decode(response.body)["error"]?? "Timed out";
+      _error = json.decode(response.body)["error"] ?? "Timed out";
       notifyListeners();
     } else {
       throw Exception("Failed reading the announcement");
@@ -828,7 +861,8 @@ class DashModel extends ChangeNotifier {
     notifyListeners();
   }
 
-  Future<void> updateSelectedImage({ImageModel image, bool delete = false}) async {
+  Future<void> updateSelectedImage(
+      {ImageModel image, bool delete = false}) async {
     final DbProvider dbProvider = DbProvider.instance;
     if (delete != null && delete) {
       await dbProvider.delete(_selectedMeter.id);
@@ -843,7 +877,8 @@ class DashModel extends ChangeNotifier {
   Future<bool> sendFeedback(String feedback) async {
     try {
       await getToken();
-      http.Response response = await networkProvider.post(uri: "/feedback", body: {
+      http.Response response =
+          await networkProvider.post(uri: "/feedback", body: {
         "access_token": dash.token,
         "feedback": feedback,
         "language": _langs.data[dash.language].code.toLowerCase()
@@ -869,6 +904,98 @@ class DashModel extends ChangeNotifier {
     } catch (e) {
       return false;
     }
+  }
 
+  Future<bool> getHistory(int meterId) async {
+    try {
+      _isLoading = true;
+      notifyListeners();
+      await getToken();
+      http.Response response = await networkProvider
+          .post(uri: "/meters-history/${_selectedAddress.id}/$meterId", body: {
+        "access_token": dash.token,
+        "language": _langs.data[dash.language].code.toLowerCase()
+      });
+      if (response.statusCode == 200) {
+        _history = MeterHistoryData.fromJson(response.body.parseJSON());
+        notifyListeners();
+        return true;
+      }
+      return false;
+    } on TimeoutException catch (_) {
+      _error = hardcodedTranslation(dash.language, "timeout")["title"];
+      notifyListeners();
+      return false;
+    } on NoInternetException catch (_) {
+      _error = hardcodedTranslation(dash.language, "internet_loss")["title"];
+      notifyListeners();
+      return false;
+    } catch (e, stack) {
+      print("$e \n $stack");
+      return false;
+    } finally {
+      _isLoading = false;
+      notifyListeners();
+    }
+  }
+
+  Future<bool> renameMeter(String name) async {
+    try {
+      _isLoading = true;
+      notifyListeners();
+
+      http.Response response = await networkProvider
+          .post(uri: "/meters-rename/${_history.data[0].iD}", body: {
+        "access_token": dash.token,
+        "language": _langs.data[dash.language].code.toLowerCase(),
+        "name": name,
+      });
+      if (response.statusCode == 200) {
+        _error = "";
+        _hasError = false;
+        notifyListeners();
+        _success = "Successfully changed the name!";
+        notifyListeners();
+        return true;
+      }
+      _hasError = true;
+      _error = "There was an error adding stuff";
+      notifyListeners();
+      return false;
+    } on TimeoutException catch (_) {
+      _error = hardcodedTranslation(dash.language, "timeout")["title"];
+      notifyListeners();
+      return false;
+    } on NoInternetException catch (_) {
+      _error = hardcodedTranslation(dash.language, "internet_loss")["title"];
+      notifyListeners();
+      return false;
+    } catch (e) {
+      return false;
+    } finally {
+      _isLoading = false;
+      notifyListeners();
+    }
+  }
+
+  Future<bool> updateDeviceId(String token, [bool delete = false]) async {
+      try {
+        http.Response response = await networkProvider.post(uri: "/firebase", body: {
+          "access_token": dash.token,
+          "action": !delete ? "delete" : "new",
+          "device_id_token": token
+        });
+        if (response.statusCode == 200) {
+          return true;
+        }
+        return false;
+      } catch(e) {
+        return false;
+      }
+  }
+
+  void printData() {
+    print("Hello");
+    notifyListeners();
   }
 }

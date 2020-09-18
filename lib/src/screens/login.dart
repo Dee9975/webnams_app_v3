@@ -158,24 +158,8 @@ class _LoginState extends State<Login> {
                             ),
                             buttonColor: hexToColor('#23a0ff'),
                             child: RaisedButton(
-                              child: Icon(
-                                Icons.nfc,
-                                color: Colors.white,
-                              ),
+                              child: Image.asset("assets/qrcode-scan.png", width: 25,),
                               onPressed: () async {
-//                                var options = ScanOptions(strings: {
-//                                  "cancel": Provider.of<DashModel>(context,
-//                                          listen: false)
-//                                      .getTranslation(code: "mob_app_cancel")
-//                                }, );
-//                                ScanResult result =
-//                                    await BarcodeScanner.scan(options: options);
-//                                if (result.type == ResultType.Barcode) {
-//                                  if (await Provider.of<UserData>(context, listen: false).loginBarcode(result.rawContent)) {
-//                                    await Provider.of<DashModel>(context, listen: false).newGetUser();
-//                                    Navigator.pushNamed(context, "/dashboard");
-//                                  }
-//                                }
                                 showDialog(
                                     context: context,
                                     builder: (context) {

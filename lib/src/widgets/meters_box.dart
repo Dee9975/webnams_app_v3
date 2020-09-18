@@ -5,8 +5,8 @@ import 'package:webnams_app_v3/src/models/meters/data.dart';
 import 'package:webnams_app_v3/src/resources/colors.dart';
 import 'package:webnams_app_v3/src/resources/my_flutter_app_icons.dart';
 import 'package:webnams_app_v3/src/screens/picker.dart';
+import 'package:supercharged/supercharged.dart';
 
-import 'meters_modal.dart';
 
 const Color _kKeyUmbraOpacity = Color(0x33000000); // alpha = 0.2
 const Color _kKeyPenumbraOpacity = Color(0x24000000); // alpha = 0.14
@@ -58,7 +58,7 @@ class MetersBox extends StatelessWidget {
                 children: <Widget>[
                   Icon(
                     MyFlutterApp.skait,
-                    color: hexToColor('#8d96a4'),
+                    color: data.color.toColor(),
                   ),
                   Text(
                     data.type,

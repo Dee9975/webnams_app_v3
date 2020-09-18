@@ -1,9 +1,12 @@
+import 'package:barcode/barcode.dart';
 import 'package:clipboard_manager/clipboard_manager.dart';
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:provider/provider.dart';
 import 'package:webnams_app_v3/src/models/dashboard/dashboard_model.dart';
+import 'package:webnams_app_v3/src/models/language/language.dart';
 import 'package:webnams_app_v3/src/resources/colors.dart';
+import 'package:webnams_app_v3/src/screens/barcode_screen.dart';
 
 class Bill extends StatelessWidget {
   @override
@@ -27,15 +30,19 @@ class Bill extends StatelessWidget {
 }
 
 class BillBody extends StatelessWidget {
+  String buildBarcode(Barcode bc, String data,
+      {String filename, double width, double height, double fontHeight}) {
+    return bc.toSvg(data);
+  }
+
   @override
   Widget build(BuildContext context) {
     final dashState = Provider.of<DashModel>(context);
     void copyToClipboard() {
       ClipboardManager.copyToClipBoard(
-          Provider.of<DashModel>(context,
-              listen: false)
-              .selectedBill
-              .number)
+              Provider.of<DashModel>(context, listen: false)
+                  .selectedBill
+                  .number)
           .then((value) {
         final snackbar = SnackBar(
           content: Text(dashState.getTranslation(code: "mob_app_copied")),
@@ -43,12 +50,11 @@ class BillBody extends StatelessWidget {
         Scaffold.of(context).showSnackBar(snackbar);
       });
     }
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: <Widget>[
-        dashState.debugError != null
-            ? Text(dashState.debugError)
-            : Offstage(),
+        dashState.debugError != null ? Text(dashState.debugError) : Offstage(),
         Row(
           children: [
             GestureDetector(
@@ -180,6 +186,60 @@ class BillBody extends StatelessWidget {
             ],
           ),
         ),
+        Provider.of<DashModel>(context).selectedBill.barcode != null
+            ? Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.only(left: 16.0, top: 24.0),
+                    child: Text(
+                      "Barcodes",
+                      style: TextStyle(
+                          fontSize: 28.0, fontWeight: FontWeight.bold),
+                    ),
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.only(top: 16.0),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: Provider.of<DashModel>(context)
+                          .selectedBill
+                          .barcode
+                          .map((e) => GestureDetector(
+                                onTap: () {
+                                  Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                          builder: (context) => BarcodeScreen(
+                                                data: e,
+                                              )));
+                                },
+                                child: Padding(
+                                  padding: const EdgeInsets.symmetric(
+                                      vertical: 4.0, horizontal: 16.0),
+                                  child: Row(
+                                    mainAxisAlignment:
+                                        MainAxisAlignment.spaceBetween,
+                                    children: [
+                                      e.logo != null
+                                          ? Image.network(e.logo)
+                                          : Text(
+                                              e.name,
+                                              style: TextStyle(
+                                                  fontSize: 16.0,
+                                                  fontWeight: FontWeight.bold),
+                                            ),
+                                      Icon(Icons.arrow_right)
+                                    ],
+                                  ),
+                                ),
+                              ))
+                          .toList(),
+                    ),
+                  ),
+                ],
+              )
+            : Offstage(),
 //          Padding(
 //            padding: EdgeInsets.only(left: 16.0, right: 16.0, top: 6.0),
 //            child: Row(
@@ -196,30 +256,30 @@ class BillBody extends StatelessWidget {
 
         Provider.of<DashModel>(context).selectedBill.files.invoice != null
             ? Padding(
-          padding:
-          const EdgeInsets.only(left: 16.0, right: 16.0, top: 32.0),
-          child: ButtonTheme(
-            height: 48.0,
-            minWidth: double.infinity,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(24.0),
-            ),
-            buttonColor: hexToColor('#23a0ff'),
-            child: RaisedButton(
-              child: Text(
-                dashState.getTranslation(code: 'mob_app_download'),
-                style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 18.0,
-                    fontWeight: FontWeight.w600),
-              ),
-              onPressed: () async {
+                padding:
+                    const EdgeInsets.only(left: 16.0, right: 16.0, top: 32.0),
+                child: ButtonTheme(
+                  height: 48.0,
+                  minWidth: double.infinity,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(24.0),
+                  ),
+                  buttonColor: hexToColor('#23a0ff'),
+                  child: RaisedButton(
+                    child: Text(
+                      dashState.getTranslation(code: 'mob_app_download'),
+                      style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 18.0,
+                          fontWeight: FontWeight.w600),
+                    ),
+                    onPressed: () async {
 //                  await Provider.of<DashModel>(context, listen: false).downloadPdf();
-                Navigator.pushNamed(context, '/pdf');
-              },
-            ),
-          ),
-        )
+                      Navigator.pushNamed(context, '/pdf');
+                    },
+                  ),
+                ),
+              )
             : Offstage(),
       ],
     );

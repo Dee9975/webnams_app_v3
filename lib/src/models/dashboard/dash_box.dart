@@ -1,6 +1,7 @@
 import 'package:webnams_app_v3/src/models/announcements/announcements.dart';
 import 'package:webnams_app_v3/src/models/dashboard/dashAnnouncements.dart';
 import 'package:webnams_app_v3/src/models/meters/data.dart';
+import 'package:supercharged/supercharged.dart';
 
 class DashBoardBox {
   int rows;
@@ -36,10 +37,12 @@ class DashBoxData {
   Balance balance;
   List<MeterData> meters;
   List<AnnouncementData> announcements;
-  DashBoxData({this.balance, this.meters, this.announcements});
+  AutoRefresh autoRefresh;
+  DashBoxData({this.balance, this.meters, this.announcements, this.autoRefresh});
 
   DashBoxData.fromJson(Map<String, dynamic> json) {
     balance = json['balance'] != null ? Balance.fromJson(json['balance']) : null;
+    autoRefresh = AutoRefresh.fromJson(json["auto-refresh"]);
     if (json['meters'] != null) {
       meters = new List<MeterData>();
       json['meters'].forEach((v) => meters.add(MeterData.fromJson(v)));
@@ -79,6 +82,18 @@ class Balance {
     data['type'] = this.type;
     data['type_id'] = this.typeId;
     return data;
+  }
+}
+
+class AutoRefresh {
+  int value;
+  String unit;
+
+  AutoRefresh({this.value, this.unit});
+
+  AutoRefresh.fromJson(Map<String, dynamic> json) {
+    value = json["value"];
+    unit = json["units"];
   }
 }
 

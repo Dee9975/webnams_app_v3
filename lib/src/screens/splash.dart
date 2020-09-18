@@ -1,9 +1,13 @@
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:webnams_app_v3/src/models/dashboard/dashboard_model.dart';
 import 'package:webnams_app_v3/src/resources/networking.dart';
 import 'package:webnams_app_v3/src/resources/translations.dart';
+import 'package:webnams_app_v3/src/screens/announcements.dart';
+
+import 'dashboard.dart';
 
 class Splash extends StatefulWidget {
   const Splash({Key key}) : super(key: key);
@@ -13,6 +17,7 @@ class Splash extends StatefulWidget {
 }
 
 class _SplashState extends State<Splash> {
+  final FirebaseMessaging _firebaseMessaging = FirebaseMessaging();
   bool loading = false;
   bool retry = false;
   Widget body = Center(
@@ -23,16 +28,47 @@ class _SplashState extends State<Splash> {
   );
   SplashState state = SplashState.loading;
   SplashState loggedInState;
+  int selectedIndex = 0;
 
   @override
   initState() {
     super.initState();
+    WidgetsFlutterBinding.ensureInitialized();
+    _firebaseMessaging.configure(
+      onMessage: (Map<String, dynamic> message) async {
+        Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => Dashboard(selectedIndex: int.parse(message["selected_index"]))));
+        print(message);
+      },
+      onLaunch: (Map<String, dynamic> message) async {
+        print("onLaunch: $message");
+      },
+      onResume: (Map<String, dynamic> message) async {
+        if (context.read<DashModel>().dash.token != null) {
+          Navigator.pushNamed(context, "/dashboard");
+        }
+        print("onResume: $message");
+      },
+    );
+    _firebaseMessaging.requestNotificationPermissions(IosNotificationSettings(
+        sound: true, badge: true, alert: true, provisional: false));
+    _firebaseMessaging.onIosSettingsRegistered
+        .listen((IosNotificationSettings settings) {
+      print("Settings registered: $settings");
+    });
+    _firebaseMessaging.getToken().then((String token) {
+      assert(token != null);
+      SharedPreferences prefs;
+      SharedPreferences.getInstance().then((value) {
+        prefs = value;
+        prefs.setString("device_id", token).then((value) => print(prefs.getString("device_id")));
+      });
+    });
     Future.microtask(() async {
       SharedPreferences prefs = await SharedPreferences.getInstance();
       bool success = await getData();
       if (success) {
         if (prefs.containsKey('userExists') && prefs.getBool('userExists')) {
-          Navigator.pushNamed(context, '/dashboard');
+          Navigator.push(context, MaterialPageRoute(builder: (context) => Dashboard(selectedIndex: 0)));
         } else {
           Navigator.pushNamed(context, '/login');
         }
@@ -42,7 +78,6 @@ class _SplashState extends State<Splash> {
 
   Future<void> retryData() async {
     bool success = await getData(true);
-    print(success);
     if (success) {
       if (loggedInState == SplashState.loggedIn) {
         Navigator.pushNamed(context, "/dashboard");

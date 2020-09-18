@@ -29,6 +29,7 @@ class _MeterPickerState extends State<MeterPicker> with WidgetsBindingObserver {
   bool _shouldIgnore = false;
   String warning;
   double spending;
+  bool loading = false;
   bool flash;
   Icon flashIcon = Icon(
     Icons.flash_on,
@@ -238,7 +239,7 @@ class _MeterPickerState extends State<MeterPicker> with WidgetsBindingObserver {
             if (spending > selectedMeter.limit) {
               setState(() {
                 warning = translations['mob_app_consumption_too_big'];
-                _shouldIgnore = true;
+                _shouldIgnore = false;
               });
             } else {
               setState(() {
@@ -331,7 +332,7 @@ class _MeterPickerState extends State<MeterPicker> with WidgetsBindingObserver {
     generateResult();
     _checkReading(result);
 
-    return WillPopScope(
+    return !loading ? WillPopScope(
       onWillPop: () async {
         if (await TorchCompat.hasTorch) {
           await TorchCompat.turnOff();
@@ -509,7 +510,14 @@ class _MeterPickerState extends State<MeterPicker> with WidgetsBindingObserver {
                         } else {
                           await dashState.sendReading(int.parse(result));
                         }
+                        setState(() {
+                          loading = true;
+                        });
                         await dashState.refreshMeters();
+                        await dashState.refreshHome();
+                        setState(() {
+                          loading = false;
+                        });
                         if (await TorchCompat.hasTorch) {
                           await TorchCompat.turnOff();
                         }
@@ -539,7 +547,9 @@ class _MeterPickerState extends State<MeterPicker> with WidgetsBindingObserver {
                           fontWeight: FontWeight.w600),
                     ),
                     onPressed: () async {
-                      await TorchCompat.turnOff();
+                      if (await TorchCompat.hasTorch) {
+                        await TorchCompat.turnOff();
+                      }
                       Navigator.pop(context);
                     },
                     // onPressed: _isButtonDisabled ? null : _updateEmail,
@@ -550,6 +560,6 @@ class _MeterPickerState extends State<MeterPicker> with WidgetsBindingObserver {
           ),
         ),
       ),
-    );
+    ) : Scaffold(body: Center(child: CircularProgressIndicator(),),);
   }
 }

@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -24,44 +26,43 @@ class _FeedbackState extends State<FeedbackScreen> {
   int charCount = 0;
   String error = "";
   bool active = true;
+  Utf8Codec encoding = Utf8Codec();
   @override
   void initState() {
     super.initState();
     feedbackController.addListener(feedbackListener);
+
   }
 
   void feedbackListener() {
-    setState(() {
-      feedback = feedbackController.text?? "";
-      charCount = feedback.trim().length;
-    });
+    if (feedbackController.text.length < 10) {
+      setState(() {
+        active = false;
+        error = Provider.of<DashModel>(context, listen: false).getTranslation(code: "mob_app_feedback_too_short");
+      });
+    } else {
+      setState(() {
+        error = "";
+        feedback = feedbackController.text;
+        active = true;
+      });
+    }
+    if (feedbackController.text == "") {
+      setState(() {
+        active = false;
+        error = "";
+      });
+    }
   }
 
   @override
   Widget build(BuildContext context) {
     DashModel dashState = Provider.of<DashModel>(context);
     Future<void> sendFeedback() async {
-      if (feedback == "") {
-        setState(() {
-          active = false;
-          error = "The input field can't be empty!";
-        });
-        return;
-      }
-      if (charCount < 10) {
-        setState(() {
-          active = false;
-          error = "Must input more than 10 characters";
-        });
-        return;
-      }
-      setState(() {
-        active = false;
-      });
       if (await Provider.of<DashModel>(context, listen: false).sendFeedback(feedback)) {
         feedbackController.text = "";
         _scaffoldKey.currentState.showSnackBar(SnackBar(
-          backgroundColor: Colors.greenAccent,
+          backgroundColor: Colors.lightGreen,
           content: Text(Provider.of<DashModel>(context, listen: false).success),
         ));
       } else {
@@ -129,7 +130,11 @@ class _FeedbackState extends State<FeedbackScreen> {
                       ),
                     ),
                     Padding(
-                      padding: EdgeInsets.only(top: 16.0),
+                      padding: const EdgeInsets.all(8.0),
+                      child: Text(error?? "", style: TextStyle(fontSize: 16.0, fontWeight: FontWeight.bold, color: Colors.red),),
+                    ),
+                    Padding(
+                      padding: EdgeInsets.only(top: 8.0),
                       child: IgnorePointer(
                         ignoring: !active,
                         child: ButtonTheme(

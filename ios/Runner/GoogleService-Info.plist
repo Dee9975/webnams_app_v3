@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>CLIENT_ID</key>
+	<string>526295679456-tnt5otg5m6dnq7sui9iuneatri2afkne.apps.googleusercontent.com</string>
+	<key>REVERSED_CLIENT_ID</key>
+	<string>com.googleusercontent.apps.526295679456-tnt5otg5m6dnq7sui9iuneatri2afkne</string>
+	<key>ANDROID_CLIENT_ID</key>
+	<string>526295679456-ksa4a3gcm8tgqjc2jf5frbft5a861qee.apps.googleusercontent.com</string>
+	<key>API_KEY</key>
+	<string>AIzaSyAzB1x_GZeegO_DqUTm4jgGFJTUR_1STNQ</string>
+	<key>GCM_SENDER_ID</key>
+	<string>526295679456</string>
+	<key>PLIST_VERSION</key>
+	<string>1</string>
+	<key>BUNDLE_ID</key>
+	<string>lv.vardatusistemas.webnamsAppV3</string>
+	<key>PROJECT_ID</key>
+	<string>webnams-app</string>
+	<key>STORAGE_BUCKET</key>
+	<string>webnams-app.appspot.com</string>
+	<key>IS_ADS_ENABLED</key>
+	<false></false>
+	<key>IS_ANALYTICS_ENABLED</key>
+	<false></false>
+	<key>IS_APPINVITE_ENABLED</key>
+	<true></true>
+	<key>IS_GCM_ENABLED</key>
+	<true></true>
+	<key>IS_SIGNIN_ENABLED</key>
+	<true></true>
+	<key>GOOGLE_APP_ID</key>
+	<string>1:526295679456:ios:cc9d597e6b89a7671eeb85</string>
+	<key>DATABASE_URL</key>
+	<string>https://webnams-app.firebaseio.com</string>
+</dict>
+</plist>

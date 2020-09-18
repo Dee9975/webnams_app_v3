@@ -6,6 +6,7 @@ import 'package:webnams_app_v3/src/models/dashboard/dashboard_model.dart';
 import 'package:webnams_app_v3/src/models/user/user_model.dart';
 import 'package:webnams_app_v3/src/resources/colors.dart';
 import 'package:supercharged/supercharged.dart';
+import 'package:webnams_app_v3/src/screens/password_reset.dart';
 
 class Password extends StatefulWidget {
   const Password({Key key}) : super(key: key);
@@ -43,21 +44,23 @@ class _PasswordState extends State<Password> {
     final dashState = Provider.of<DashModel>(context);
 
     void updatePassword(String password) async {
+      Provider.of<DashModel>(context, listen: false).hasError = false;
       setState(() {
         _loading = true;
       });
-      await Provider.of<UserData>(context, listen: false)
-          .updatePassword(password);
-      await dashState.newGetUser();
-      if (dashState.hasError) {
-        showDialog(context: context, builder: (context) {
-          return AlertDialog(
-            title: Text(dashState.error?? "Error tings innit"),
-          );
+      if (password.length == 0) {
+        setState(() {
+          _loading = false;
         });
+        return;
+      }
+      if (!await Provider.of<UserData>(context, listen: false)
+          .updatePassword(password)) {
+
       }
       if (dashState.hasError) {
-        Provider.of<UserData>(context, listen: false).updateError(true, dashState.error);
+        Provider.of<UserData>(context, listen: false)
+            .updateError(true, dashState.error);
         setState(() {
           _loading = false;
         });
@@ -67,6 +70,13 @@ class _PasswordState extends State<Password> {
         _loading = false;
       });
       if (!Provider.of<UserData>(context, listen: false).hasError) {
+        setState(() {
+          _loading = true;
+        });
+        await dashState.newGetUser();
+        setState(() {
+          _loading = false;
+        });
         Navigator.pushNamed(context, '/dashboard');
       }
     }
@@ -182,15 +192,23 @@ class _PasswordState extends State<Password> {
                 ),
               ),
             ),
-//            GestureDetector(
-//              onTap: () {
-//
-//              },
-//              child: Padding(
-//                padding: const EdgeInsets.all(8.0),
-//                child: Center(child: Text("Aizmirsi paroli?", style: TextStyle(fontSize: 16.0, fontWeight: FontWeight.w600, color: "#23a0ff".toColor()),)),
-//              ),
-//            )
+            GestureDetector(
+              onTap: () {
+                Navigator.push(context,
+                    MaterialPageRoute(builder: (context) => PasswordReset()));
+              },
+              child: Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: Center(
+                    child: Text(
+                  "Aizmirsi paroli?",
+                  style: TextStyle(
+                      fontSize: 16.0,
+                      fontWeight: FontWeight.w600,
+                      color: "#23a0ff".toColor()),
+                )),
+              ),
+            )
           ],
         ),
       );

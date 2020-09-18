@@ -1,9 +1,12 @@
 import 'dart:async';
+import 'dart:convert';
 import 'dart:io';
 
 import 'package:camera/camera.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:webnams_app_v3/src/models/dashboard/dashboard_model.dart';
 import 'package:webnams_app_v3/src/models/user/user_model.dart';
 import 'package:webnams_app_v3/src/screens/announcement_details.dart';
@@ -34,16 +37,6 @@ class App extends StatefulWidget {
 class AppState extends State<App> {
   final CameraDescription camera;
   AppState(this.camera);
-
-  @override
-  void initState() {
-    super.initState();
-  }
-
-  @override
-  void dispose() {
-    super.dispose();
-  }
 
   Widget build(BuildContext context) {
     SystemChrome.setPreferredOrientations([

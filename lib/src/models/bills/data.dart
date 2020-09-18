@@ -13,6 +13,7 @@ class BillsData {
   int type;
   String address;
   Files files;
+  List<Barcode> barcode;
 
   BillsData(
       {this.iD,
@@ -28,7 +29,8 @@ class BillsData {
         this.createDate,
         this.dueDate,
         this.address,
-        this.billPeriod
+        this.billPeriod,
+        this.barcode
       });
 
   BillsData.fromJson(Map<String, dynamic> json) {
@@ -46,6 +48,12 @@ class BillsData {
     dueDate = json["due_date"];
     address = json["address"];
     billPeriod = json["bill_period"];
+    if (json["barcode"] != null) {
+      barcode = new List<Barcode>();
+      json["barcode"].forEach((v) {
+        barcode.add(Barcode.fromJson(v));
+      });
+    }
   }
 
   Map<String, dynamic> toJson() {
@@ -136,5 +144,21 @@ class Attachments {
     data['url'] = this.url;
     data['name'] = this.name;
     return data;
+  }
+}
+
+class Barcode {
+  String name;
+  String data;
+  String type;
+  String logo;
+
+  Barcode({this.data, this.name, this.type, this.logo});
+
+  Barcode.fromJson(Map<String, dynamic> json) {
+    name = json["name"];
+    data = json["data"];
+    type = json["type"];
+    logo = json["logo"];
   }
 }

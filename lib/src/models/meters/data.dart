@@ -16,6 +16,7 @@ class MeterData {
   Map<String, dynamic> avgReading;
   var limit;
   var readingPrediction;
+  String color;
 
   MeterData(
       {this.id,
@@ -34,7 +35,8 @@ class MeterData {
       this.limit,
       this.currentConsumption,
       this.currentReading,
-      this.readingPrediction});
+      this.readingPrediction,
+      this.color});
 
   MeterData.fromJson(Map<String, dynamic> json) {
     id = json['ID'];
@@ -54,6 +56,7 @@ class MeterData {
     currentConsumption = json['current_consumption'];
     currentReading = json['current_reading'];
     readingPrediction = json['reading_prediction']?? 0;
+    color = json["color"];
   }
 
   Map<String, dynamic> toJson() {

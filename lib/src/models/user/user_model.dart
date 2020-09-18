@@ -25,6 +25,7 @@ class UserData extends ChangeNotifier {
   HostModel _hosts;
   String _qrError = "";
   bool _hasQrError = false;
+  String _success = "";
 
   final client = http.Client();
   NetworkProvider networkProvider;
@@ -33,6 +34,7 @@ class UserData extends ChangeNotifier {
     networkProvider = NetworkProvider(client: client, baseUrl: _url);
   }
 
+  String get success => _success;
   bool get isFetching => _isFetching;
   String get error => _error;
   bool get hasError => _hasError;
@@ -49,11 +51,18 @@ class UserData extends ChangeNotifier {
     notifyListeners();
   }
 
-  Future<void> updatePassword(String password) async {
-    user.password = password;
-    notifyListeners();
-    await newLogin();
-    notifyListeners();
+  Future<bool> updatePassword(String password) async {
+    try {
+      user.password = password;
+      notifyListeners();
+      if (!await newLogin()) {
+        throw Exception("Failed logging in");
+      }
+      notifyListeners();
+      return true;
+    } catch (e) {
+      return false;
+    }
   }
 
   void updateHost(int id, String hostName) {
@@ -140,7 +149,7 @@ class UserData extends ChangeNotifier {
     notifyListeners();
   }
 
-  Future<void> newLogin() async {
+  Future<bool> newLogin() async {
     _isFetching = true;
     notifyListeners();
     try {
@@ -174,15 +183,17 @@ class UserData extends ChangeNotifier {
         notifyListeners();
         _isFetching = false;
         notifyListeners();
-        return;
+        return true;
       }
       TokenError tokenError = TokenError.fromJson(json.decode(response.body));
       _hasError = true;
       notifyListeners();
-      _error = "zzz";
+      _error = tokenError.error;
       notifyListeners();
+      return false;
     } on NoInternetException catch (e) {
       print(e);
+      return false;
     }
   }
 
@@ -258,6 +269,29 @@ class UserData extends ChangeNotifier {
       _isFetching = false;
       notifyListeners();
     }
+  }
 
+  Future<bool> resetPassword(String email) async {
+    try {
+      http.Response response = await networkProvider.post(uri: "/forgot-password", body: {
+        "host_id": "${user.host}",
+        "user": email
+      });
+      if (response.statusCode == 200) {
+        _error = "";
+        _hasError = false;
+        notifyListeners();
+        _success = response.body.parseJSON()["data"]["message"] ?? "success";
+        notifyListeners();
+        return true;
+      }
+      _error = response.body.parseJSON()["error"]?? "Error";
+      notifyListeners();
+      return false;
+    } catch (e) {
+      _error = "Error";
+      notifyListeners();
+      return false;
+    }
   }
 }
